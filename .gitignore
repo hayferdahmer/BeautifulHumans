@@ -1,0 +1,23 @@
+# Local test environments
+.testhome/
+.tmp/
+
+# Node test dependencies
+tools/.deps/
+tools/node_modules/
+
+# Logs and transient output
+*.log
+test-output.txt
+server-console.txt
+
+# Local GitHub web-upload staging (generated)
+.github-upload/
+BeautifulHumans-upload.zip
+GITHUB_UPLOAD.md
+
+# OS / editor
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/
