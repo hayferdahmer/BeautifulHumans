@@ -1,0 +1,24 @@
+* text=auto eol=lf
+
+# Lua and documentation should be LF even on Windows.
+*.lua text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Windows-only helper scripts.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary game assets and archives.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ogg binary
+*.wav binary
+*.mp3 binary
+*.zip binary
