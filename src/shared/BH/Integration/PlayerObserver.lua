@@ -198,3 +198,139 @@ function Player.ScanBaseInjuries(player, ext, context)
                 created = created + 1
             end
             if state.burn and not previous.burn then
+                createFromTransition(ext, zone, "burn", 45, "environment", missingHealth, now)
+                created = created + 1
+            end
+            if state.bleeding and not state.bandaged and not previous.bleeding then
+                local zoneState = Model.GetZoneState(ext, zone.id, false)
+                local hasBleeding = false
+                if zoneState then
+                    for _, injury in pairs(zoneState.injuries) do
+                        if (injury.bleeding or 0) > 0.1 then
+                            hasBleeding = true
+                            break
+                        end
+                    end
+                end
+                if not hasBleeding then
+                    createFromTransition(ext, zone, "cut", 20, "unknown", missingHealth, now)
+                    created = created + 1
+                end
+            end
+
+            -- The base game may apply a bandage without asking BH. Mirror the
+            -- bandaged state so the medical panel does not contradict it.
+            if state.bandaged then
+                local zoneState = Model.GetZoneState(ext, zone.id, false)
+                if zoneState then
+                    for _, injury in pairs(zoneState.injuries) do
+                        if not injury.bandaged and injury.status ~= "healed" then
+                            injury.bandaged = true
+                            injury.bleeding = math.min(injury.bleeding or 0, 5)
+                            injury.meta = injury.meta or {}
+                            injury.meta.externalBandage = true
+                        end
+                    end
+                end
+            end
+            if state.infection > 0 then
+                local zoneState = Model.GetZoneState(ext, zone.id, false)
+                if zoneState then
+                    for _, injury in pairs(zoneState.injuries) do
+                        injury.infection = math.max(injury.infection or 0, state.infection)
+                    end
+                end
+            end
+
+            baseline.zones[zone.id] = state
+        end
+    end
+
+    Player.baselines[key] = baseline
+    return created
+end
+
+function Player.OnCreate(playerIndex, player)
+    local ext = Player.EnsurePlayer(player)
+    if ext then
+        BH.Log.Info("player", "Player extension ready", {
+            player = ext.metadata.ownerKey,
+            schema = ext.schemaVersion,
+            injuries = BH.Persistence.CountInjuries(ext),
+        })
+    end
+end
+
+function Player.OnUpdate(player)
+    if not player then
+        return
+    end
+    local key = Player.Key(player)
+    local interval = BH.Config.Get("tickInterval") or 30
+    local counter = (Player.tickCounters[key] or 0) + 1
+    if counter < interval then
+        Player.tickCounters[key] = counter
+        return
+    end
+    Player.tickCounters[key] = 0
+
+    local ext = Player.EnsurePlayer(player)
+    if not ext then
+        return
+    end
+
+    local context = Player.pendingContext[key] or {}
+    Player.pendingContext[key] = nil
+    Player.ScanBaseInjuries(player, ext, context)
+
+    local now = BH.Persistence.GetGameTimeHours()
+    local last = Player.lastTickAt[key]
+    local minutes = 0.5
+    if last and now > last then
+        minutes = BH.Util.Clamp((now - last) * 60, 0.1, 60)
+    end
+    Player.lastTickAt[key] = now
+
+    local healed = Model.Tick(ext, minutes)
+    if BH.Physiology and BH.Physiology.Tick then
+        BH.Physiology.Tick(ext, minutes)
+    end
+
+    if healed > 0 then
+        BH.Log.Info("player", "Injuries healed", { count = healed })
+    end
+end
+
+function Player.OnGetDamage(character, damageType, damage)
+    if not character then
+        return
+    end
+    local source = "unknown"
+    if damageType == "FALLDOWN" then
+        source = "fall"
+    elseif damageType == "CARHITDAMAGE" or damageType == "CARCRASHDAMAGE" then
+        source = "vehicle"
+    elseif damageType == "WEAPONHIT" then
+        source = "weapon"
+    elseif damageType == "BLEEDING" then
+        source = "medical"
+    end
+
+    local key = Player.Key(character)
+    Player.pendingContext[key] = {
+        source = source,
+        damageType = damageType,
+        damage = damage,
+        at = BH.Persistence.GetGameTimeHours(),
+    }
+end
+
+function Player.OnDeath(player)
+    local key = Player.Key(player)
+    Player.baselines[key] = nil
+    Player.tickCounters[key] = nil
+    Player.lastTickAt[key] = nil
+    Player.pendingContext[key] = nil
+end
+
+return Player
