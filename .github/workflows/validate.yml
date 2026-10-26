@@ -29,3 +29,19 @@ jobs:
 
       - name: Validate release
         run: node tools/validate.mjs
+
+      - name: Upload BeautifulHumansCore artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BeautifulHumansCore-0.1.0
+          path: releases/BeautifulHumansCore
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload BHTestMod artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BHTestMod-0.1.0
+          path: releases/BHTestMod
+          if-no-files-found: error
+          retention-days: 30
