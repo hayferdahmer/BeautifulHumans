@@ -133,7 +133,7 @@ node tools/run_tests.mjs
 Ожидаемо:
 
 ```text
-TEST_SUMMARY total=53 passed=53 failed=0 assertions=<reported by runner>
+TEST_SUMMARY total=53 passed=53 failed=0 assertions=195
 ```
 
 Runtime-тест:
