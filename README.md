@@ -1,231 +1,197 @@
-# Beautiful Humans
-
 <p align="center">
-  <b>Единая симуляционная платформа выживания для Project Zomboid Build 42</b><br/>
-  <sub>анатомия · физиология · травмы · лечение · модульное ядро</sub>
+  <img src="docs/assets/banner.svg" alt="Beautiful Humans — Deeper Survival. Realer You." width="100%"/>
 </p>
 
-> **Текущий статус:** `0.1.0` — фундамент платформы, а не релиз 1.0.0.
-> Реализованы Core, Persistence, Anatomy, Physiology, Medical и
-> интеграционный слой. NPC, экономика, транспорт и массовая симуляция
-> отложены.
+<p align="center">
+  <a href="https://github.com/hayferdahmer/BeautifulHumans/actions/workflows/validate.yml"><img src="https://img.shields.io/github/actions/workflow/status/hayferdahmer/BeautifulHumans/validate.yml?branch=main&style=for-the-badge&label=CI" alt="CI status"/></a>
+  <img src="https://img.shields.io/badge/Project_Zomboid-Build_42.21.0-6d777d?style=for-the-badge&logo=steam&logoColor=white" alt="Project Zomboid Build 42.21.0"/>
+  <img src="https://img.shields.io/badge/Lua-Kahlua-315c61?style=for-the-badge&logo=lua&logoColor=white" alt="Lua"/>
+  <img src="https://img.shields.io/badge/Version-0.1.0-c56b35?style=for-the-badge" alt="Version 0.1.0"/>
+  <img src="https://img.shields.io/badge/License-pending-7b5550?style=for-the-badge" alt="License pending"/>
+</p>
 
----
+<p align="center">
+  <strong>Глубже выживание. Реальнее человек.</strong><br/>
+  <sub>Анатомия · физиология · медицина · психика · заражение · общество</sub>
+</p>
 
-## Что уже работает
+<p align="center">
+  <a href="#vision">Концепция</a> · <a href="#systems">Системы</a> · <a href="#architecture">Архитектура</a> · <a href="#roadmap">Дорожная карта</a> · <a href="#development">Разработка</a> · <a href="#docs">Документация</a>
+</p>
 
-- модульное ядро с направленными зависимостями и изоляцией ошибок;
-- версионируемая схема character extension в `player:getModData()`;
-- миграции, ремонт и карантин повреждённых записей;
-- 17 анатомических зон, привязанных к `BodyPartType`;
-- структурированные травмы (порез, укус, перелом, ожог и т.д.);
-- несколько травм в одной зоне не перезаписывают друг друга;
-- физиологические последствия: боль, кровопотеря, mobility/manipulation;
-- диагностика и лечение: examine, clean, bandage, splint, stitch,
-  remove bandage;
-- идемпотентность лечения по `requestId`;
-- внутренняя шина событий с приоритетами и защитой от re-entrancy;
-- runtime self-test на выделенном сервере;
-- 39 unit-тестов (128 assertions).
+<p align="center"><img src="docs/assets/divider.svg" width="88%" alt=""/></p>
 
-## Чего ещё нет
+## О проекте
 
-- полноценного игрового UI;
-- timed actions и анимаций лечения;
-- серверной авторизации лечения в мультиплеере;
-- зомби-анатомии и поведения;
-- NPC, экономики, жилья, транспорта;
-- профилирования FPS;
-- теста реального сохранения/загрузки персонажа.
+**Beautiful Humans (BH)** — долгосрочный проект глубокой переработки выживания в **Project Zomboid**. Его цель — сделать персонажа полноценной симуляционной системой: с анатомией, физиологией, травмами, лечением, психическим состоянием и последствиями решений.
 
-Подробно: [TECHNICAL_AUDIT.md](docs/TECHNICAL_AUDIT.md),
-[ROADMAP.md](docs/ROADMAP.md).
+Это не набор разрозненных механик и не косметический UI-мод. BH строится как модульная платформа, в которой системы используют общие данные, согласованные правила и единые контракты.
 
----
+> Мир должен реагировать на состояние человека. Травма — менять возможности. Болезнь — развиваться. Решения — иметь цену. А производительность — оставаться предсказуемой даже в долгой многопользовательской игре.
 
-## Целевая среда
+<a id="vision"></a>
+
+## Видение
+
+<table>
+  <tr>
+    <td width="50%"><h3>🫀 Человек</h3>Анатомия, физиология, боль, кровопотеря, травмы, болезни, психика и восстановление.</td>
+    <td width="50%"><h3>🧟 Угроза</h3>Заражение, поведение зомби, повреждения, адаптация и опасность окружающего мира.</td>
+  </tr>
+  <tr>
+    <td><h3>🏚️ Среда</h3>Укрытия, поселения, безопасные зоны, строительство, предметы, ресурсы и транспорт.</td>
+    <td><h3>👥 Общество</h3>NPC, фракции, профессии, отношения, торговля, экономика и конфликты.</td>
+  </tr>
+</table>
+
+<p align="center"><sub>Это целевое направление проекта. Наличие системы в концепции не означает, что она уже реализована.</sub></p>
+
+<a id="systems"></a>
+
+## Системы проекта
+
+Статусы отражают фактическое состояние разработки, а не обещания.
+
+| Подсистема | Назначение | Статус |
+|---|---|---|
+| **Core** | Загрузка, модули, конфигурация, события, диагностика | 🟢 Foundation |
+| **Persistence** | Данные персонажа, схема, миграции, восстановление | 🟢 Foundation |
+| **Anatomy** | 17 зон тела, модель травм, функциональные ограничения | 🟢 Foundation |
+| **Physiology** | Боль, кровопотеря, подвижность и возможности | 🟢 Foundation |
+| **Medical** | Диагностика и медицинские процедуры | 🟠 Stage 2 |
+| **Mind** | Стресс, страх, психика и когнитивные состояния | ⚪ Planned |
+| **Undead** | Состояния, повреждения и поведение заражённых | ⚪ Planned |
+| **Equipment / World** | Предметы, материалы, окружение и строительство | ⚪ Planned |
+| **Society** | NPC, профессии, фракции и экономика | ⚪ Planned |
+| **Wildlife** | Животные и экосистема | ⚪ Planned |
+
+### Что уже заложено в кодовую базу
+
+- Модульное ядро с направленными зависимостями и изоляцией ошибок.
+- Версионируемые данные персонажа в `player:getModData()`.
+- Миграции, проверка, ремонт и карантин повреждённых записей.
+- 17 анатомических зон и структурированная модель травм.
+- Несколько травм в одной зоне без молчаливой перезаписи.
+- Физиологические последствия: боль, кровопотеря, mobility и manipulation.
+- Каталог медицинских действий и базовые правила лечения.
+- Внутренняя шина событий и runtime self-test.
+- Headless-тесты, сборка и статическая проверка артефактов.
+
+### Текущий этап
+
+**Stage 2 — первая игровая вертикаль.** Базовая медицинская логика существует; в отдельном draft PR разрабатывается первый UI-срез и игровой поток лечения. Он ещё не принят в `main` и требует проверки в самой игре и мультиплеере.
+
+<a id="architecture"></a>
+
+## Архитектура
+
+<p align="center"><img src="docs/assets/architecture.svg" width="100%" alt="Архитектура Beautiful Humans"/></p>
+
+BH разделяет модель данных, доменные правила, интеграцию с игрой и представление. UI не должен самостоятельно рассчитывать медицинские показатели, а клиент не должен быть источником истины для критических изменений.
+
+### Основные принципы
+
+1. **Server-authoritative:** сервер подтверждает критические изменения состояния в мультиплеере.
+2. **Single source of truth:** базовые игровые системы остаются владельцами своих исходных показателей.
+3. **Модульность:** подсистемы имеют явные границы и направленные зависимости.
+4. **Безопасные сохранения:** схема версионируется, данные ограничены и мигрируют.
+5. **Измеряемая производительность:** никаких бесконтрольных обходов мира и тяжёлых операций каждый кадр.
+6. **Проверяемость:** изменения сопровождаются тестами, проверкой сборки и ручными игровыми сценариями.
+
+### Жизненный цикл данных персонажа
+
+```mermaid
+flowchart TD
+    A[Project Zomboid Player] --> B[Persistence]
+    B --> C[Character Extension]
+    C --> D[Anatomy]
+    D --> E[Physiology]
+    E --> F[Medical]
+    F --> G{Server validation}
+    G -->|Accepted| H[Persisted state]
+    G -->|Rejected| I[No domain mutation]
+    H --> J[UI / feedback]
+```
+
+<a id="roadmap"></a>
+
+## Дорожная карта
+
+```mermaid
+flowchart LR
+    S0["0 · Технический аудит<br/>Завершён"] --> S1["1 · Core и инфраструктура<br/>В основном завершён"]
+    S1 --> S2["2 · Первая игровая вертикаль<br/>В работе"]
+    S2 --> S3["3 · Первая игровая версия"]
+    S3 --> S4["4 · Инженерия и окружение"]
+    S4 --> S5["5 · Экономика и поселения"]
+    S5 --> S6["6 · NPC и общество"]
+    S6 --> S7["7 · Транспорт и тактика"]
+    S7 --> S8["8 · Животные и экосистема"]
+    S8 --> S9["9 · Углубление симуляции"]
+    S9 --> S10["10 · Стабилизация 1.0.0"]
+```
+
+Подробные критерии этапов и ограничения: [ROADMAP.md](docs/ROADMAP.md).
+
+<a id="development"></a>
+
+## Разработка
+
+### Целевая среда
 
 | Параметр | Значение |
 |---|---|
 | Игра | Project Zomboid |
-| Сборка | **42.21.0** |
+| Проверенная сборка | **42.21.0** |
 | Revision | `4a0e9546ec` |
 | Steam buildid | `25485521` |
-| Режимы | одиночная игра, выделенный сервер |
+| Режимы | Singleplayer / Dedicated Server |
 | Язык | Lua (Kahlua) |
+| Инструменты | Node.js 22 · headless Lua harness |
 
-Другая сборка требует повторного аудита.
+Совместимость с другими сборками не предполагается без повторного аудита.
 
----
+### Сборка
 
-## Установка
-
-### Готовая сборка
-
-Вариант 1 — распаковать `releases/BeautifulHumansCore-0.1.0.zip` в
-`%USERPROFILE%\Zomboid\mods` (в архиве уже есть папка `BeautifulHumansCore`).
-
-Вариант 2:
-
-```powershell
-Copy-Item -Recurse -Force releases\BeautifulHumansCore "$env:USERPROFILE\Zomboid\mods\BeautifulHumansCore"
-```
-
-Включить `Beautiful Humans Core` в списке модов.
-
-### Тестовый мод
-
-```powershell
-Copy-Item -Recurse -Force releases\BHTestMod "$env:USERPROFILE\Zomboid\mods\BHTestMod"
-```
-
-`BHTestMod` требует `BeautifulHumansCore`. После запуска в `console.txt`
-появится:
-
-```text
-BH_TEST_RESULT PASS total=11 failures=0 version=0.1.0
-```
-
-### Сборка из исходников
-
-```powershell
+```bash
 node tools/build.mjs
 node tools/validate.mjs
 ```
 
----
+### Тесты
 
-## Быстрый старт в игре
-
-1. Запустить debug-режим.
-2. Открыть Lua-консоль.
-3. Выполнить:
-
-```lua
-BH.Commands.Help()
-BH.Commands.Injury("left_thigh", "cut", 60)
-BH.Commands.Self()
-BH.Commands.Treat(nil, "bandage")
-BH.Commands.Self()
-```
-
-4. Сохранить, выйти, загрузить, снова выполнить `BH.Commands.Self()`.
-
-Ожидаемо: одна травма, кровотечение остановлено, состояние сохранилось.
-
----
-
-## Тесты
-
-```powershell
-pnpm --dir tools install
+```bash
+npm install --prefix tools --no-audit --no-fund
 node tools/run_tests.mjs
 ```
 
-Ожидаемо:
+GitHub Actions выполняет тесты, собирает оба игровых артефакта и проверяет структуру релиза при каждом PR в `main`.
 
-```text
-TEST_SUMMARY total=39 passed=39 failed=0 assertions=128
-```
+### Установка
 
-Runtime-тест:
+До появления стабильного публичного релиза используйте инструкции из [PUBLISHING.md](docs/PUBLISHING.md) и тестовые сборки из CI. Не устанавливайте артефакты из незавершённых веток на основной игровой сервер.
 
-```powershell
-node tools/build.mjs
-# скопировать releases/BeautifulHumansCore и releases/BHTestMod в Zomboid/mods
-# включить оба мода, запустить игру/сервер
-```
-
-Подробности: [TESTING.md](docs/TESTING.md).
-
----
-
-## Структура
-
-```text
-BeautifulHumans/
-├── docs/                     документация
-├── src/
-│   ├── shared/BH/            Core, Persistence, Anatomy, Physiology, Medical
-│   │   ├── Core.lua
-│   │   ├── Persistence/
-│   │   ├── Anatomy/
-│   │   ├── Physiology/
-│   │   ├── Medical/
-│   │   └── Integration/
-│   ├── shared/BH_Bootstrap.lua
-│   ├── client/
-│   └── server/
-├── tests/
-│   ├── unit/                 headless Lua-тесты
-│   └── integration/          BHTestMod
-├── tools/                    build, validate, test
-└── releases/
-    ├── BeautifulHumansCore/  готовый мод
-    └── BHTestMod/            тестовый мод
-```
-
----
+<a id="docs"></a>
 
 ## Документация
 
-| Документ | Содержание |
+| Документ | О чём |
 |---|---|
-| [TECHNICAL_AUDIT.md](docs/TECHNICAL_AUDIT.md) | аудит Build 42, матрица реализуемости |
-| [AUDIT_EVIDENCE.md](docs/AUDIT_EVIDENCE.md) | краткие логи и результаты проверок |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | слои, зависимости, загрузка, события |
-| [DATA_MODEL.md](docs/DATA_MODEL.md) | схема character extension и травм |
-| [MODULES.md](docs/MODULES.md) | модули, границы, статусы |
-| [NETWORKING.md](docs/NETWORKING.md) | server-authoritative модель |
-| [PERFORMANCE.md](docs/PERFORMANCE.md) | бюджеты и план профилирования |
-| [TESTING.md](docs/TESTING.md) | тесты и ручные сценарии |
-| [PUBLISHING.md](docs/PUBLISHING.md) | создание репозитория GitHub, первый push, релизы |
-| [ROADMAP.md](docs/ROADMAP.md) | этапы 0–10 |
+| [Технический аудит](docs/TECHNICAL_AUDIT.md) | API Build 42, ограничения и подтверждённые возможности |
+| [Архитектура](docs/ARCHITECTURE.md) | Слои, модули, зависимости и жизненный цикл |
+| [Модель данных](docs/DATA_MODEL.md) | Структура персонажа и травм |
+| [Модули](MODULES.md) | Каталог подсистем и их границы |
+| [Сеть](docs/NETWORKING.md) | Серверная авторизация и сетевые контракты |
+| [Производительность](docs/PERFORMANCE.md) | Бюджеты, ограничения и план профилирования |
+| [Тестирование](docs/TESTING.md) | Автоматические и ручные проверки |
+| [Дорожная карта](docs/ROADMAP.md) | Этапы 0–10 и критерии приёмки |
+| [Changelog](CHANGELOG.md) | История заметных изменений |
+| [Публикация](docs/PUBLISHING.md) | Сборка и выпуск |
 
----
+<p align="center"><img src="docs/assets/divider.svg" width="88%" alt=""/></p>
 
-## Команды разработчика
+## Принцип проекта
 
-```lua
-BH.Commands.Help()
-BH.Commands.Self()
-BH.Commands.Injury(zone, kind, severity)
-BH.Commands.List()
-BH.Commands.Treat(injuryId, action)
-BH.Commands.Tick(minutes)
-BH.Commands.Heal(injuryId)
-BH.Commands.Reset()
-BH.Commands.Snapshot()
-```
+Beautiful Humans должен быть не просто большим модом. Он должен быть **согласованной, расширяемой и оптимизированной симуляцией**, где каждая новая механика усиливает остальные, а не создаёт очередной независимый набор скриптов.
 
-Это **отладочные** команды. Они обходят проверку предметов и не являются
-сетевым API.
-
----
-
-## Известные ограничения
-
-1. Спина не является отдельной зоной `BodyPartType`.
-2. `OnPlayerGetDamage` не передаёт body part; зона выводится из состояния.
-3. `OnPlayerGetDamage` для кровотечения может срабатывать каждый кадр;
-   BH использует throttle и baseline.
-4. Лечение в мультиплеере пока не авторизуется сервером.
-5. Нет UI и анимаций лечения.
-6. Нет NPC и экономики.
-7. Нет профилирования FPS.
-
----
-
-## Совместимость
-
-- Build 42.21.0 — подтверждена.
-- Build 41 — не поддерживается.
-- Другие моды — не тестировались.
-- Прямой перехват стандартных функций не используется.
-
----
-
-## Лицензия
-
-Лицензия ещё не выбрана. До публичного релиза файл `LICENSE` должен быть
-заменён выбранным текстом. Сейчас код является внутренним проектом.
+<p align="center"><sub>BEAUTIFUL HUMANS · PROJECT ZOMBOID · DEEPER SURVIVAL. REALER YOU.</sub></p>
