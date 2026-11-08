@@ -261,6 +261,43 @@ function Player.OnCreate(playerIndex, player)
     end
 end
 
+function Player.ProcessSimulation(player, minutes, context)
+    if not player then
+        return false, "player is nil"
+    end
+    if not BH.Util.IsFiniteNumber(minutes) or minutes <= 0 then
+        return false, "elapsed simulation minutes must be positive and finite"
+    end
+
+    -- Injury progression already caps its own integration step. Keep the
+    -- physiology model bounded as well after long server pauses.
+    minutes = math.min(minutes, 1440)
+    local ext, errorMessage = Player.EnsurePlayer(player)
+    if not ext then
+        return false, errorMessage
+    end
+
+    local key = Player.Key(player)
+    context = type(context) == "table" and context or Player.pendingContext[key] or {}
+    Player.pendingContext[key] = nil
+    Player.ScanBaseInjuries(player, ext, context)
+
+    local healed = Model.Tick(ext, minutes)
+    if BH.Physiology and BH.Physiology.Tick then
+        BH.Physiology.Tick(ext, minutes)
+    end
+    if healed > 0 then
+        BH.Log.Info("player", "Injuries healed", { count = healed })
+    end
+    return true, { healed = healed, minutes = minutes }
+end
+
+-- Dedicated server entry point. The server runtime invokes this from the
+-- shared scheduler; it never relies on the local-player OnPlayerUpdate event.
+function Player.OnServerSimulationTick(player, minutes)
+    return Player.ProcessSimulation(player, minutes)
+end
+
 function Player.OnUpdate(player)
     if not player then
         return
@@ -274,15 +311,6 @@ function Player.OnUpdate(player)
     end
     Player.tickCounters[key] = 0
 
-    local ext = Player.EnsurePlayer(player)
-    if not ext then
-        return
-    end
-
-    local context = Player.pendingContext[key] or {}
-    Player.pendingContext[key] = nil
-    Player.ScanBaseInjuries(player, ext, context)
-
     local now = BH.Persistence.GetGameTimeHours()
     local last = Player.lastTickAt[key]
     local minutes = 0.5
@@ -290,15 +318,7 @@ function Player.OnUpdate(player)
         minutes = BH.Util.Clamp((now - last) * 60, 0.1, 60)
     end
     Player.lastTickAt[key] = now
-
-    local healed = Model.Tick(ext, minutes)
-    if BH.Physiology and BH.Physiology.Tick then
-        BH.Physiology.Tick(ext, minutes)
-    end
-
-    if healed > 0 then
-        BH.Log.Info("player", "Injuries healed", { count = healed })
-    end
+    Player.ProcessSimulation(player, minutes)
 end
 
 function Player.OnGetDamage(character, damageType, damage)
