@@ -80,14 +80,14 @@ end
 
 -- Build 42 executes complete() on the authoritative server for MP timed actions.
 function TimedAction:complete()
-    if isServer and isServer() then
-        if BH.Integration and BH.Integration.Network then
-            BH.Integration.Network.HandleTreatment(self.character, {
-                injuryId = self.injuryId,
-                action = self.actionId,
-                requestId = self.requestId,
-            })
-        end
+    -- Timed actions run on the initiating client. The server validates the
+    -- intent and inventory before applying any treatment effect.
+    if sendClientCommand then
+        sendClientCommand(self.character, "BH", "treat", {
+            injuryId = self.injuryId,
+            action = self.actionId,
+            requestId = self.requestId,
+        })
     end
 end
 
