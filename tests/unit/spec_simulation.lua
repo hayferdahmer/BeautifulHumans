@@ -185,3 +185,58 @@ describe("Simulation LOD", function()
         falsy(BH.Simulation.LOD.IsValid(2.5))
     end)
 end)
+
+
+describe("Dedicated server simulation runtime", function()
+    it("processes all online players with elapsed game minutes", function()
+        local players = {
+            values = { "first", "second", "third" },
+            size = function(self) return #self.values end,
+            get = function(self, index) return self.values[index + 1] end,
+        }
+        local seen = {}
+        local ok, stats = BH.Simulation.ServerRuntime.ProcessOnlinePlayers(
+            players,
+            0.5,
+            function(player, minutes)
+                seen[#seen + 1] = { player = player, minutes = minutes }
+            end
+        )
+        truthy(ok)
+        eq(stats.players, 3)
+        eq(stats.processed, 3)
+        eq(stats.failed, 0)
+        eq(seen[1].player, "first")
+        eq(seen[2].minutes, 30)
+        eq(seen[3].player, "third")
+    end)
+
+    it("isolates one player's processing failure", function()
+        local players = {
+            values = { "bad", "good" },
+            size = function(self) return #self.values end,
+            get = function(self, index) return self.values[index + 1] end,
+        }
+        local ok, stats = BH.Simulation.ServerRuntime.ProcessOnlinePlayers(
+            players,
+            1 / 60,
+            function(player)
+                if player == "bad" then error("simulated failure") end
+            end
+        )
+        truthy(ok)
+        eq(stats.processed, 1)
+        eq(stats.failed, 1)
+    end)
+
+    it("rejects invalid elapsed time and invalid player collections", function()
+        local ok = BH.Simulation.ServerRuntime.ProcessOnlinePlayers({}, 0)
+        falsy(ok)
+        ok = BH.Simulation.ServerRuntime.ProcessOnlinePlayers(nil, 1)
+        falsy(ok)
+        ok = BH.Simulation.ServerRuntime.ProcessOnlinePlayers({
+            size = function() return "invalid" end,
+        }, 1)
+        falsy(ok)
+    end)
+end)
