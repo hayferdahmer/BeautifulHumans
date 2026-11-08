@@ -67,15 +67,14 @@ function Network.HandleTreatment(player, args)
     end
 
     local key = BH.Persistence.GetPlayerKey(player)
-    local now = BH.Persistence.GetGameTimeHours()
-    local previous = Network.lastRequestAt[key]
-    if previous and now == previous then
-        Network.requestCounters[key] = (Network.requestCounters[key] or 0) + 1
-    else
-        Network.lastRequestAt[key] = now
-        Network.requestCounters[key] = 1
+    local now = os.time and os.time() or 0
+    local window = Network.lastRequestAt[key]
+    if not window or now - window.startedAt >= 10 then
+        window = { startedAt = now, count = 0 }
+        Network.lastRequestAt[key] = window
     end
-    if Network.requestCounters[key] > 8 then
+    window.count = window.count + 1
+    if window.count > 8 then
         return reject("too many requests")
     end
 
@@ -127,7 +126,7 @@ function Network.HandleTreatment(player, args)
 
     local result = BH.Medical.Apply(ext, args.injuryId, args.action, {
         requestId = args.requestId,
-        itemIsDirty = args.itemIsDirty == true,
+        itemIsDirty = false,
     })
     if not result.ok then
         BH.Medical.Inventory.Restore(inventory, resolved)
