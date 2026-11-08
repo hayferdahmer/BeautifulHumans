@@ -13,6 +13,7 @@ require "BH/Persistence/Persistence"
 require "BH/Anatomy/Model"
 require "BH/Medical/Medical"
 require "BH/Integration/PlayerObserver"
+require "BH/Simulation/ServerRuntime"
 
 BH.Integration = BH.Integration or {}
 local Integration = BH.Integration
@@ -117,6 +118,16 @@ function Integration.Boot()
     addGameEvent("OnHitZombie", Integration.OnHitZombie)
     addGameEvent("OnWeaponHitCharacter", Integration.OnWeaponHitCharacter)
     addGameEvent("OnPostSave", Integration.OnPostSave)
+
+    -- Register the dedicated-server lifecycle only after the player observer
+    -- and the regular start callbacks are available.
+    local runtime = BH.Simulation and BH.Simulation.ServerRuntime
+    if runtime and type(runtime.RegisterLifecycle) == "function" then
+        local runtimeOk, runtimeError = runtime.RegisterLifecycle()
+        if not runtimeOk and isServer and isServer() then
+            BH.Log.Error("integration", "Could not register server simulation lifecycle", tostring(runtimeError))
+        end
+    end
 
     return true
 end
