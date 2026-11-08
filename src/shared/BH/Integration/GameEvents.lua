@@ -124,7 +124,12 @@ function Integration.Boot()
     local runtime = BH.Simulation and BH.Simulation.ServerRuntime
     if runtime and type(runtime.RegisterLifecycle) == "function" then
         local runtimeOk, runtimeError = runtime.RegisterLifecycle()
-        if not runtimeOk and isServer and isServer() then
+        local serverProcess = false
+        if type(isServer) == "function" then
+            local serverOk, serverValue = pcall(isServer)
+            serverProcess = serverOk and serverValue == true
+        end
+        if not runtimeOk and serverProcess then
             BH.Log.Error("integration", "Could not register server simulation lifecycle", tostring(runtimeError))
         end
     end
