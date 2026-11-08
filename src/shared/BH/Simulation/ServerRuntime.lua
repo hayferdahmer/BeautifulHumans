@@ -209,6 +209,10 @@ function Runtime.RegisterLifecycle()
 
     local ok, errorMessage = pcall(function()
         Events.OnServerStarted.Add(function()
+            -- Ensure all registered modules have initialised before runtime work begins.
+            if BH.Start then
+                BH.Start()
+            end
             local started, startError = Runtime.Start()
             if not started and BH.Log then
                 BH.Log.Error("simulation", "Dedicated-server runtime did not start", tostring(startError))
