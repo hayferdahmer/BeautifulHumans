@@ -65,16 +65,19 @@ const sources = [
   "src/shared/BH/Physiology/Physiology.lua",
   "src/shared/BH/Medical/Treatments.lua",
   "src/shared/BH/Medical/Medical.lua",
+  "src/shared/BH/Medical/Inventory.lua",
   // Integration files are loaded for syntax/registration checks. Their game
   // event callbacks are not invoked without a running game.
   "src/shared/BH/Integration/PlayerObserver.lua",
   "src/shared/BH/Integration/Commands.lua",
+  "src/shared/BH/Integration/Network.lua",
   "src/shared/BH/Integration/GameEvents.lua",
   "tests/unit/runner.lua",
   "tests/unit/spec_core.lua",
   "tests/unit/spec_persistence.lua",
   "tests/unit/spec_anatomy.lua",
   "tests/unit/spec_medical.lua",
+  "tests/unit/spec_inventory.lua",
   "tests/unit/spec_physiology.lua",
 ];
 
