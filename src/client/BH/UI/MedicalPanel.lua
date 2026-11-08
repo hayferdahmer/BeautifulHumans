@@ -5,6 +5,7 @@
 require "ISUI/ISCollapsableWindow"
 require "ISUI/ISButton"
 require "TimedActions/ISTimedActionQueue"
+require "BH/Medical/TimedAction"
 
 BH = BH or {}
 BH.UI = BH.UI or {}
