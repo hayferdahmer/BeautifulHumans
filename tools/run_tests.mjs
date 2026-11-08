@@ -61,6 +61,7 @@ const sources = [
   "src/shared/BH/Simulation/Scheduler.lua",
   "src/shared/BH/Simulation/LOD.lua",
   "src/shared/BH/Simulation/Simulation.lua",
+  "src/shared/BH/Simulation/ServerRuntime.lua",
   "src/shared/BH/Persistence/Schema.lua",
   "src/shared/BH/Persistence/Persistence.lua",
   "src/shared/BH/Anatomy/Zones.lua",
