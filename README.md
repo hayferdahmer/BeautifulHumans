@@ -32,7 +32,7 @@
 - единый путь симуляции травм и физиологии для серверного и локального режимов;
 - политика LOD четырёх уровней (Active / Nearby / Regional / Global);
 - runtime self-test на выделенном сервере;
-- 53 unit-теста; в том числе тесты Clock, Scheduler и LOD.
+- 56 unit-тестов, включая серверный runtime и обработку списка онлайн-игроков.
 
 ## Чего ещё нет
 
@@ -135,7 +135,7 @@ node tools/run_tests.mjs
 Ожидаемо:
 
 ```text
-TEST_SUMMARY total=53 passed=53 failed=0 assertions=195
+TEST_SUMMARY total=56 passed=56 failed=0 assertions=208
 ```
 
 Runtime-тест:
