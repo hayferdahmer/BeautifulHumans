@@ -84,4 +84,5 @@ function LOD.IsValid(level)
     return finite(level) and level == math.floor(level) and profiles[level] ~= nil
 end
 
+BH.Simulation.LOD = LOD
 return LOD
