@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="36" viewBox="0 0 1000 36" role="img" aria-label="Beautiful Humans divider">
+<defs><linearGradient id="line"><stop stop-color="#d96d32" stop-opacity="0"/><stop offset=".48" stop-color="#e98b4a"/><stop offset=".52" stop-color="#e98b4a"/><stop offset="1" stop-color="#d96d32" stop-opacity="0"/></linearGradient></defs>
+<path d="M24 18H440M560 18H976" stroke="url(#line)" stroke-width="1.5"/>
+<path d="M482 18l18-11 18 11-18 11z" fill="#e98b4a" fill-opacity=".18" stroke="#e98b4a"/>
+<circle cx="500" cy="18" r="3" fill="#ffd2a8"/>
+<circle cx="470" cy="18" r="2" fill="#e98b4a"/><circle cx="530" cy="18" r="2" fill="#e98b4a"/>
+</svg>
