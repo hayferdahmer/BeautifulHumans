@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="570" viewBox="0 0 1120 570" role="img" aria-labelledby="t d">
+<title id="t">Beautiful Humans architecture</title><desc id="d">Layered architecture: Game API, integration, domain modules, persistence and user interface.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#111820"/><stop offset="1" stop-color="#202a30"/></linearGradient><linearGradient id="a" x2="1"><stop stop-color="#b94f24"/><stop offset="1" stop-color="#ed9b58"/></linearGradient><linearGradient id="b" x2="1"><stop stop-color="#315c61"/><stop offset="1" stop-color="#4e8980"/></linearGradient></defs>
+<rect width="1120" height="570" rx="18" fill="url(#bg)"/>
+<g font-family="Arial, sans-serif" fill="#eef2f3">
+ <text x="44" y="52" font-size="22" font-weight="700" letter-spacing="2">BEAUTIFUL HUMANS / SYSTEM ARCHITECTURE</text>
+ <text x="44" y="80" font-size="13" fill="#9eabb1">One domain model · explicit ownership · server-authoritative mutations</text>
+ <rect x="44" y="112" width="1032" height="68" rx="12" fill="#28343c" stroke="#70818a"/>
+ <text x="560" y="140" text-anchor="middle" font-size="17" font-weight="700">PROJECT ZOMBOID · BUILD 42 API</text>
+ <text x="560" y="160" text-anchor="middle" font-size="12" fill="#b8c4c9">BodyDamage · Inventory · Events · Characters · World</text>
+ <path d="M560 180v32" stroke="#e98b4a" stroke-width="2"/><path d="M552 204l8 9 8-9" fill="none" stroke="#e98b4a" stroke-width="2"/>
+ <rect x="44" y="218" width="1032" height="68" rx="12" fill="#342a25" stroke="#d27b45"/>
+ <text x="560" y="246" text-anchor="middle" font-size="17" font-weight="700">INTEGRATION LAYER</text>
+ <text x="560" y="266" text-anchor="middle" font-size="12" fill="#d6b8a2">Game events · Client commands · Server validation · Adapters</text>
+ <path d="M560 286v30M180 316h760M180 316v22M435 316v22M685 316v22M940 316v22" stroke="#e98b4a" stroke-width="2" fill="none"/>
+ <rect x="60" y="338" width="220" height="86" rx="12" fill="#1c2a2e" stroke="#4e8980"/><text x="170" y="370" text-anchor="middle" font-size="16" font-weight="700">ANATOMY</text><text x="170" y="394" text-anchor="middle" font-size="11" fill="#a8c1bd">Injuries · zones · function</text><rect x="315" y="338" width="220" height="86" rx="12" fill="#1c2a2e" stroke="#4e8980"/><text x="425" y="370" text-anchor="middle" font-size="16" font-weight="700">PHYSIOLOGY</text><text x="425" y="394" text-anchor="middle" font-size="11" fill="#a8c1bd">Pain · blood · capacity</text><rect x="570" y="338" width="220" height="86" rx="12" fill="#1c2a2e" stroke="#4e8980"/><text x="680" y="370" text-anchor="middle" font-size="16" font-weight="700">MEDICAL</text><text x="680" y="394" text-anchor="middle" font-size="11" fill="#a8c1bd">Diagnosis · procedures</text><rect x="825" y="338" width="220" height="86" rx="12" fill="#1c2a2e" stroke="#4e8980"/><text x="935" y="370" text-anchor="middle" font-size="16" font-weight="700">MIND / UNDEAD</text><text x="935" y="394" text-anchor="middle" font-size="11" fill="#a8c1bd">Cognition · infection</text>
+ <path d="M170 424v34h390v18M425 424v34M680 424v34M935 424v34h-375" stroke="#e98b4a" stroke-width="1.5" fill="none"/>
+ <rect x="300" y="476" width="520" height="58" rx="10" fill="#292d34" stroke="#b77a49"/>
+ <text x="560" y="501" text-anchor="middle" font-size="16" font-weight="700">PERSISTENCE · VERSIONED CHARACTER DATA</text>
+ <text x="560" y="519" text-anchor="middle" font-size="11" fill="#b7c0c5">Schema · migrations · validation · bounded history</text>
+</g></svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="330" viewBox="0 0 1120 330" role="img" aria-labelledby="t d">
+<title id="t">Beautiful Humans injury and recovery loop</title><desc id="d">A conceptual cycle from injury through physiology, symptoms, treatment and recovery.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#10171c"/><stop offset="1" stop-color="#222a2e"/></linearGradient><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6" fill="none" stroke="#e88b4a" stroke-width="1.2"/></marker></defs>
+<rect width="1120" height="330" rx="18" fill="url(#bg)"/>
+<g font-family="Arial,sans-serif" fill="#edf1f2">
+<text x="40" y="46" font-size="20" font-weight="700" letter-spacing="2">THE HUMAN SURVIVAL LOOP</text>
+<text x="40" y="70" font-size="12" fill="#9daab0">Conceptual domain flow — not a claim that every system is implemented</text>
+<g text-anchor="middle">
+<rect x="36" y="126" width="160" height="92" rx="12" fill="#34251f" stroke="#d8793b"/><text x="116" y="164" font-size="16" font-weight="700">INJURY</text><text x="116" y="188" font-size="12" fill="#c8b5a9">Anatomy</text>
+<rect x="246" y="126" width="160" height="92" rx="12" fill="#1e3031" stroke="#56877f"/><text x="326" y="164" font-size="16" font-weight="700">PHYSIOLOGY</text><text x="326" y="188" font-size="12" fill="#b2c9c3">Pain · blood · function</text>
+<rect x="456" y="126" width="160" height="92" rx="12" fill="#28303a" stroke="#758998"/><text x="536" y="164" font-size="16" font-weight="700">CONSEQUENCES</text><text x="536" y="188" font-size="12" fill="#b8c3ca">Movement · decisions</text>
+<rect x="666" y="126" width="160" height="92" rx="12" fill="#34251f" stroke="#d8793b"/><text x="746" y="164" font-size="16" font-weight="700">TREATMENT</text><text x="746" y="188" font-size="12" fill="#c8b5a9">Medical · resources</text>
+<rect x="876" y="126" width="208" height="92" rx="12" fill="#1e3031" stroke="#56877f"/><text x="980" y="164" font-size="16" font-weight="700">RECOVERY</text><text x="980" y="188" font-size="12" fill="#b2c9c3">Healing · rehabilitation</text>
+</g>
+<g stroke="#e88b4a" stroke-width="2" fill="none" marker-end="url(#arr)"><path d="M196 172h42"/><path d="M406 172h42"/><path d="M616 172h42"/><path d="M826 172h42"/><path d="M980 218v48H116v-42"/></g>
+<text x="560" y="294" font-size="12" text-anchor="middle" fill="#9daab0">Persistent character state connects each step · server validates critical multiplayer changes</text>
+</g></svg>

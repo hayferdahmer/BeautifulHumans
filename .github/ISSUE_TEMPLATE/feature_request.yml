@@ -1,0 +1,49 @@
+name: Feature proposal
+description: Предложить механику, систему или улучшение
+title: "[FEATURE] "
+labels: ["enhancement", "needs-design"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Какую проблему или потребность решает идея?
+    validations:
+      required: true
+  - type: textarea
+    id: experience
+    attributes:
+      label: Какой игровой опыт должен получить игрок?
+      description: Опишите сценарий, а не только название механики.
+    validations:
+      required: true
+  - type: dropdown
+    id: domain
+    attributes:
+      label: Область проекта
+      options:
+        - Character / Anatomy
+        - Physiology / Medical
+        - Mind / Infection
+        - Undead / AI
+        - Equipment / Crafting
+        - World / Building
+        - NPC / Society
+        - Economy / Factions
+        - Wildlife
+        - UI / Accessibility
+        - Performance / Multiplayer
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Ограничения и крайние случаи
+      description: Производительность, мультиплеер, совместимость, баланс и сохранения.
+    validations:
+      required: false
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Альтернативы
+      validations:
+        required: false
