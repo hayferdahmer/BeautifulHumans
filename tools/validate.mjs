@@ -60,6 +60,16 @@ if (!fs.existsSync(releaseRoot)) {
     fail(`mod.info modversion does not match BH.VERSION ${version[1]}`);
   }
 
+  for (const requiredClientFile of [
+    "42/media/lua/client/BH/UI/MedicalPanel.lua",
+    "42/media/lua/client/BH/Integration/MedicalContextMenu.lua",
+    "42/media/lua/shared/BH/Medical/TimedAction.lua",
+  ]) {
+    if (!fs.existsSync(path.join(releaseRoot, requiredClientFile))) {
+      fail(`required medical gameplay file is missing: ${requiredClientFile}`);
+    }
+  }
+
   const files = walk(path.join(releaseRoot, "42"));
   if (files.length === 0) fail("release contains no Lua files");
   const luaFiles = files.filter((file) => file.endsWith(".lua"));
