@@ -78,6 +78,7 @@ const sources = [
   "tests/unit/spec_anatomy.lua",
   "tests/unit/spec_medical.lua",
   "tests/unit/spec_inventory.lua",
+  "tests/unit/spec_network.lua",
   "tests/unit/spec_physiology.lua",
 ];
 
