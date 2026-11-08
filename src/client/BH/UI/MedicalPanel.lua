@@ -67,9 +67,6 @@ end
 function MedicalPanel:createChildren()
     ISCollapsableWindow.createChildren(self)
 
-    self:drawText("ACTIVE INJURIES", 12, 34, 0.85, 0.88, 0.92, 1, UIFont.Small)
-    self:drawText("SELECTED INJURY", 260, 34, 0.85, 0.88, 0.92, 1, UIFont.Small)
-
     for index = 1, 6 do
         local button = ISButton:new(12, 58 + (index - 1) * 42, 224, 34, "", self, MedicalPanel.onSelectInjury)
         button:initialise()
@@ -235,6 +232,8 @@ function MedicalPanel:render()
         return
     end
 
+    self:drawText("ACTIVE INJURIES", 12, 34, 0.85, 0.88, 0.92, 1, UIFont.Small)
+    self:drawText("SELECTED INJURY", 260, 34, 0.85, 0.88, 0.92, 1, UIFont.Small)
     self:drawText(self.selectedTitle or "No injury selected", 260, 62, 1, 1, 1, 1, UIFont.Medium)
     self:drawText(self.selectedDetails or "", 260, 92, 0.82, 0.84, 0.86, 1, UIFont.Small)
 
