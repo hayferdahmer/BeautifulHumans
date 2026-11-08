@@ -65,17 +65,27 @@ const sources = [
   "src/shared/BH/Physiology/Physiology.lua",
   "src/shared/BH/Medical/Treatments.lua",
   "src/shared/BH/Medical/Medical.lua",
+  "src/shared/BH/Medical/Inventory.lua",
+  "src/shared/BH/Medical/TimedAction.lua",
   // Integration files are loaded for syntax/registration checks. Their game
   // event callbacks are not invoked without a running game.
   "src/shared/BH/Integration/PlayerObserver.lua",
   "src/shared/BH/Integration/Commands.lua",
+  "src/shared/BH/Integration/Network.lua",
   "src/shared/BH/Integration/GameEvents.lua",
   "tests/unit/runner.lua",
   "tests/unit/spec_core.lua",
   "tests/unit/spec_persistence.lua",
   "tests/unit/spec_anatomy.lua",
   "tests/unit/spec_medical.lua",
+  "tests/unit/spec_inventory.lua",
+  "tests/unit/spec_network.lua",
   "tests/unit/spec_physiology.lua",
+];
+
+const syntaxOnlySources = [
+  "src/client/BH/UI/MedicalPanel.lua",
+  "src/client/BH/Integration/MedicalContextMenu.lua",
 ];
 
 for (const relative of sources) {
@@ -92,6 +102,19 @@ for (const relative of sources) {
   if (callStatus !== lua.LUA_OK) {
     fail(`Lua runtime error in ${relative}: ${to_jsstring(lua.lua_tostring(L, -1))}`);
   }
+}
+
+for (const relative of syntaxOnlySources) {
+  const absolute = path.join(root, relative);
+  if (!fs.existsSync(absolute)) {
+    fail(`Missing client source: ${relative}`);
+  }
+  const code = fs.readFileSync(absolute, "utf8");
+  const status = lauxlib.luaL_loadstring(L, to_luastring(code));
+  if (status !== lua.LUA_OK) {
+    fail(`Lua parse error in ${relative}: ${to_jsstring(lua.lua_tostring(L, -1))}`);
+  }
+  lua.lua_pop(L, 1);
 }
 
 lua.lua_getglobal(L, to_luastring("BH_TEST_RUN"));

@@ -20,4 +20,11 @@ require "BH/Medical/Medical"
 require "BH/Integration/Commands"
 require "BH/Integration/GameEvents"
 
+-- Client presentation is loaded only outside the dedicated server.
+local clientRuntime = not (isServer and isServer())
+if clientRuntime then
+    pcall(require, "BH/UI/MedicalPanel")
+    pcall(require, "BH/Integration/MedicalContextMenu")
+end
+
 BH.Boot()

@@ -13,6 +13,7 @@ require "BH/Persistence/Persistence"
 require "BH/Anatomy/Model"
 require "BH/Medical/Medical"
 require "BH/Integration/PlayerObserver"
+require "BH/Integration/Network"
 
 BH.Integration = BH.Integration or {}
 local Integration = BH.Integration
@@ -117,6 +118,7 @@ function Integration.Boot()
     addGameEvent("OnHitZombie", Integration.OnHitZombie)
     addGameEvent("OnWeaponHitCharacter", Integration.OnWeaponHitCharacter)
     addGameEvent("OnPostSave", Integration.OnPostSave)
+    addGameEvent("OnClientCommand", BH.Integration.Network.OnClientCommand)
 
     return true
 end
