@@ -1,0 +1,63 @@
+name: Bug report
+description: Сообщить о воспроизводимой ошибке Beautiful Humans
+title: "[BUG] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Перед отправкой проверьте, что ошибка воспроизводится без изменения исходников BH.
+  - type: input
+    id: game-build
+    attributes:
+      label: Версия Project Zomboid
+      description: Укажите Build и, если известно, revision.
+      placeholder: "42.21.0"
+    validations:
+      required: true
+  - type: input
+    id: bh-version
+    attributes:
+      label: Версия Beautiful Humans / commit
+      placeholder: "0.1.0 или SHA"
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Режим
+      options:
+        - Singleplayer
+        - Dedicated server
+        - Host / cooperative
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Шаги воспроизведения
+      description: Чем точнее шаги, тем быстрее можно найти причину.
+      placeholder: "1. Запустить...
+2. Открыть...
+3. Выполнить..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ожидаемое поведение
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Фактическое поведение
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Логи и дополнительные сведения
+      description: Приложите релевантные фрагменты console.txt и logs.zip, если возможно.
+    validations:
+      required: false
