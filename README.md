@@ -25,8 +25,11 @@
   remove bandage;
 - идемпотентность лечения по `requestId`;
 - внутренняя шина событий с приоритетами и защитой от re-entrancy;
+- симуляционный Clock с инъецируемым источником игрового времени;
+- ограниченный Scheduler с приоритетами, elapsed time и изоляцией ошибок;
+- политика LOD четырёх уровней (Active / Nearby / Regional / Global);
 - runtime self-test на выделенном сервере;
-- 39 unit-тестов (128 assertions).
+- 53 unit-теста; в том числе тесты Clock, Scheduler и LOD.
 
 ## Чего ещё нет
 
@@ -35,6 +38,8 @@
 - серверной авторизации лечения в мультиплеере;
 - зомби-анатомии и поведения;
 - NPC, экономики, жилья, транспорта;
+- подключения общего Scheduler к игровому event loop;
+- управления реальными NPC/животными/регионами через LOD;
 - профилирования FPS;
 - теста реального сохранения/загрузки персонажа.
 
@@ -128,7 +133,7 @@ node tools/run_tests.mjs
 Ожидаемо:
 
 ```text
-TEST_SUMMARY total=39 passed=39 failed=0 assertions=128
+TEST_SUMMARY total=53 passed=53 failed=0 assertions=<reported by runner>
 ```
 
 Runtime-тест:
