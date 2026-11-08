@@ -78,7 +78,6 @@ function TimedAction:perform()
     ISBaseTimedAction.perform(self)
 end
 
--- Build 42 executes complete() on the authoritative server for MP timed actions.
 function TimedAction:complete()
     -- Timed actions run on the initiating client. The server validates the
     -- intent and inventory before applying any treatment effect.
