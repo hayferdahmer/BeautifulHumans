@@ -100,6 +100,8 @@ BH разделяет модель данных, доменные правила
 
 ### Жизненный цикл данных персонажа
 
+<p align="center"><img src="docs/assets/physiology-loop.svg" width="100%" alt="Цикл травмы и восстановления"/></p>
+
 ```mermaid
 flowchart TD
     A[Project Zomboid Player] --> B[Persistence]
@@ -187,6 +189,7 @@ GitHub Actions выполняет тесты, собирает оба игров
 | [Дорожная карта](docs/ROADMAP.md) | Этапы 0–10 и критерии приёмки |
 | [Changelog](CHANGELOG.md) | История заметных изменений |
 | [Публикация](docs/PUBLISHING.md) | Сборка и выпуск |
+| [Визуальный стандарт](docs/BRANDING.md) | Палитра, баннеры, диаграммы и правила статусов |
 
 <p align="center"><img src="docs/assets/divider.svg" width="88%" alt=""/></p>
 
