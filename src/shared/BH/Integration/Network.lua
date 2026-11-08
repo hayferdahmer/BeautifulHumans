@@ -126,6 +126,7 @@ function Network.HandleTreatment(player, args)
 
     local result = BH.Medical.Apply(ext, args.injuryId, args.action, {
         requestId = args.requestId,
+        bypassItems = true,
         itemIsDirty = false,
     })
     if not result.ok then
