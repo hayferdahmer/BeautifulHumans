@@ -39,7 +39,10 @@
 - теста реального сохранения/загрузки персонажа.
 
 Подробно: [TECHNICAL_AUDIT.md](docs/TECHNICAL_AUDIT.md),
-[ROADMAP.md](docs/ROADMAP.md).
+[ROADMAP.md](docs/ROADMAP.md), [проектные решения 1–10](docs/decisions/DESIGN_DECISIONS.md),
+[матрица реализуемости](docs/decisions/IMPLEMENTATION_MATRIX.md),
+[структура проекта](docs/architecture/PROJECT_STRUCTURE.md) и
+[модель симуляции LOD](docs/architecture/SIMULATION_MODEL.md).
 
 ---
 
@@ -144,7 +147,9 @@ node tools/build.mjs
 
 ```text
 BeautifulHumans/
-├── docs/                     документация
+├── docs/
+│   ├── decisions/            проектные решения и матрица реализуемости
+│   └── architecture/         структура проекта и модель симуляции
 ├── src/
 │   ├── shared/BH/            Core, Persistence, Anatomy, Physiology, Medical
 │   │   ├── Core.lua
@@ -181,6 +186,10 @@ BeautifulHumans/
 | [TESTING.md](docs/TESTING.md) | тесты и ручные сценарии |
 | [PUBLISHING.md](docs/PUBLISHING.md) | создание репозитория GitHub, первый push, релизы |
 | [ROADMAP.md](docs/ROADMAP.md) | этапы 0–10 |
+| [DESIGN_DECISIONS.md](docs/decisions/DESIGN_DECISIONS.md) | зафиксированные решения раундов 1–10 |
+| [IMPLEMENTATION_MATRIX.md](docs/decisions/IMPLEMENTATION_MATRIX.md) | реализуемость, ограничения и риски |
+| [PROJECT_STRUCTURE.md](docs/architecture/PROJECT_STRUCTURE.md) | целевая структура каталогов и ответственность слоёв |
+| [SIMULATION_MODEL.md](docs/architecture/SIMULATION_MODEL.md) | LOD, расписание, игровое время и фоновые процессы |
 
 ---
 
