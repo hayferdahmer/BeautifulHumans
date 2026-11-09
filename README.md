@@ -27,12 +27,15 @@
 - внутренняя шина событий с приоритетами и защитой от re-entrancy;
 - симуляционный Clock с инъецируемым источником игрового времени;
 - ограниченный Scheduler с приоритетами, elapsed time и изоляцией ошибок;
-- dedicated-server runtime на серверных `OnServerStarted` / `OnTick`;
+- server-authoritative runtime для dedicated и host/listen-server через `OnServerStarted` / `OnTick`;
 - обработка онлайн-игроков сервером через общий Scheduler и `getOnlinePlayers()`;
-- единый путь симуляции травм и физиологии для серверного и локального режимов;
+- единый путь симуляции травм и физиологии для сервера и одиночного режима;
+- отдельный накопитель игрового времени для каждого онлайн-игрока;
+- bounded catch-up: до 60 игровых минут на игрока за проход, остаток времени не теряется;
+- безопасное разделение single-player и multiplayer ownership;
 - политика LOD четырёх уровней (Active / Nearby / Regional / Global);
 - runtime self-test на выделенном сервере;
-- 56 unit-тестов, включая серверный runtime и обработку списка онлайн-игроков.
+- 59 unit-тестов, включая per-player catch-up, изоляцию ошибок и режимы исполнения.
 
 ## Чего ещё нет
 
@@ -61,7 +64,7 @@
 | Сборка | **42.21.0** |
 | Revision | `4a0e9546ec` |
 | Steam buildid | `25485521` |
-| Режимы | одиночная игра, выделенный сервер |
+| Режимы | одиночная игра, dedicated server, host/listen-server |
 | Язык | Lua (Kahlua) |
 
 Другая сборка требует повторного аудита.
@@ -135,7 +138,7 @@ node tools/run_tests.mjs
 Ожидаемо:
 
 ```text
-TEST_SUMMARY total=56 passed=56 failed=0 assertions=208
+TEST_SUMMARY total=59 passed=59 failed=0 assertions=232
 ```
 
 Runtime-тест:
