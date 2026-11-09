@@ -1,6 +1,6 @@
--- Beautiful Humans / dedicated-server simulation runtime.
--- The server owns persistent character simulation. Client update events are
--- intentionally not used here: OnPlayerUpdate is a local-player event.
+-- Beautiful Humans / server-authoritative simulation runtime.
+-- Dedicated и host/listen-server используют один серверный владелец состояния.
+-- Multiplayer-клиенты не запускают каноническую симуляцию через OnPlayerUpdate.
 
 BH = BH or {}
 BH.Simulation = BH.Simulation or {}
@@ -15,9 +15,11 @@ local Runtime = {
     _clock = nil,
     _tickCallback = nil,
     _clockErrorLogged = false,
+    _playerDebtMinutes = {},
+    _maxPlayerMinutesPerPass = 60,
 }
 
-local function isDedicatedServer()
+local function isServerProcess()
     if type(isServer) ~= "function" then
         return false
     end
@@ -42,8 +44,21 @@ local function listSize(players)
     return math.floor(count)
 end
 
--- Kept independently testable: the production adapter supplies getOnlinePlayers().
-function Runtime.ProcessOnlinePlayers(players, elapsedHours, processor)
+local function playerKey(player, index)
+    local observer = BH.Integration and BH.Integration.Player
+    if observer and type(observer.Key) == "function" then
+        local ok, key = pcall(observer.Key, player)
+        if ok and type(key) == "string" and key ~= "" then
+            return key
+        end
+    end
+    return "online-index:" .. tostring(index)
+end
+
+-- Каждый игрок имеет собственный долг игрового времени. Успешная обработка
+-- уменьшает только его долг; ошибка не заставляет повторять уже обработанных.
+-- За один проход выполняется не более maxMinutesPerPass минут симуляции.
+function Runtime.ProcessOnlinePlayers(players, elapsedHours, processor, maxMinutesPerPass)
     if not finite(elapsedHours) or elapsedHours <= 0 then
         return false, "elapsed game time must be positive and finite"
     end
@@ -56,7 +71,11 @@ function Runtime.ProcessOnlinePlayers(players, elapsedHours, processor)
             if not observer or type(observer.OnServerSimulationTick) ~= "function" then
                 error("server player simulation processor is unavailable")
             end
-            return observer.OnServerSimulationTick(player, elapsedMinutes)
+            local ok, result = observer.OnServerSimulationTick(player, elapsedMinutes)
+            if ok == false then
+                error(result or "player simulation rejected")
+            end
+            return result
         end
     end
 
@@ -65,33 +84,58 @@ function Runtime.ProcessOnlinePlayers(players, elapsedHours, processor)
         return false, "online player collection has no valid size()"
     end
 
-    local elapsedMinutes = math.min(elapsedHours * 60, 1440)
-    local stats = { players = count, processed = 0, failed = 0 }
+    local chunkLimit = maxMinutesPerPass or Runtime._maxPlayerMinutesPerPass
+    if not finite(chunkLimit) or chunkLimit <= 0 then
+        return false, "catch-up chunk limit must be positive and finite"
+    end
+
+    local addedMinutes = elapsedHours * 60
+    local stats = {
+        players = count,
+        processed = 0,
+        failed = 0,
+        deferred = 0,
+        processedMinutes = 0,
+        pendingMinutes = 0,
+    }
 
     for index = 0, count - 1 do
-        local ok, player = pcall(function()
+        local readOk, player = pcall(function()
             return players:get(index)
         end)
-        if ok and player then
-            local processOk, processError = pcall(processor, player, elapsedMinutes)
-            if processOk then
-                stats.processed = stats.processed + 1
-            else
-                stats.failed = stats.failed + 1
-                if BH.Log then
-                    BH.Log.Error("simulation", "Server player simulation failed", {
-                        index = index,
-                        error = tostring(processError),
-                    })
-                end
-            end
-        else
+        if not readOk or not player then
             stats.failed = stats.failed + 1
             if BH.Log then
                 BH.Log.Warn("simulation", "Could not read online player", {
                     index = index,
                     error = tostring(player),
                 })
+            end
+        else
+            local key = playerKey(player, index)
+            local debt = (Runtime._playerDebtMinutes[key] or 0) + addedMinutes
+            local step = math.min(debt, chunkLimit)
+            local processOk, processError = pcall(processor, player, step)
+            if processOk then
+                debt = math.max(0, debt - step)
+                Runtime._playerDebtMinutes[key] = debt > 0.000001 and debt or nil
+                stats.processed = stats.processed + 1
+                stats.processedMinutes = stats.processedMinutes + step
+                if debt > 0.000001 then
+                    stats.deferred = stats.deferred + 1
+                    stats.pendingMinutes = stats.pendingMinutes + debt
+                end
+            else
+                Runtime._playerDebtMinutes[key] = debt
+                stats.failed = stats.failed + 1
+                stats.pendingMinutes = stats.pendingMinutes + debt
+                if BH.Log then
+                    BH.Log.Error("simulation", "Server player simulation failed; time debt retained", {
+                        player = key,
+                        error = tostring(processError),
+                        pendingMinutes = debt,
+                    })
+                end
             end
         end
     end
@@ -128,8 +172,8 @@ function Runtime.Start()
     if Runtime._started then
         return true
     end
-    if not isDedicatedServer() then
-        return false, "not running in a dedicated server process"
+    if not isServerProcess() then
+        return false, "not running in a server process"
     end
     if not Events or not Events.OnTick then
         return false, "server OnTick event is unavailable"
@@ -150,14 +194,11 @@ function Runtime.Start()
                 return getOnlinePlayers()
             end)
             if not ok or not players then
-                if BH.Log then
-                    BH.Log.Warn("simulation", "Could not obtain online players", tostring(players))
-                end
-                return
+                error("could not obtain online players: " .. tostring(players))
             end
             local processed, statsOrError = Runtime.ProcessOnlinePlayers(players, elapsedHours)
-            if not processed and BH.Log then
-                BH.Log.Error("simulation", "Online player processing rejected", tostring(statsOrError))
+            if not processed then
+                error(statsOrError)
             end
         end,
     })
@@ -187,9 +228,10 @@ function Runtime.Start()
 
     Runtime._started = true
     if BH.Log then
-        BH.Log.Info("simulation", "Dedicated-server simulation runtime started", {
+        BH.Log.Info("simulation", "Server-authoritative simulation runtime started", {
             process = "bh.server.players",
             intervalMinutes = 1,
+            catchUpChunkMinutes = Runtime._maxPlayerMinutesPerPass,
             schedulerLimit = scheduler.maxExecutionsPerTick,
         })
     end
@@ -200,8 +242,8 @@ function Runtime.RegisterLifecycle()
     if Runtime._lifecycleRegistered then
         return true
     end
-    if not isDedicatedServer() then
-        return false, "not running in a dedicated server process"
+    if not isServerProcess() then
+        return false, "not running in a server process"
     end
     if not Events or not Events.OnServerStarted then
         return false, "OnServerStarted event is unavailable"
@@ -209,13 +251,12 @@ function Runtime.RegisterLifecycle()
 
     local ok, errorMessage = pcall(function()
         Events.OnServerStarted.Add(function()
-            -- Ensure all registered modules have initialised before runtime work begins.
             if BH.Start then
                 BH.Start()
             end
             local started, startError = Runtime.Start()
             if not started and BH.Log then
-                BH.Log.Error("simulation", "Dedicated-server runtime did not start", tostring(startError))
+                BH.Log.Error("simulation", "Server runtime did not start", tostring(startError))
             end
         end)
     end)
@@ -225,6 +266,10 @@ function Runtime.RegisterLifecycle()
 
     Runtime._lifecycleRegistered = true
     return true
+end
+
+function Runtime.GetPlayerDebt(key)
+    return Runtime._playerDebtMinutes[key] or 0
 end
 
 function Runtime.IsStarted()
