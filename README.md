@@ -35,7 +35,7 @@
 - безопасное разделение single-player и multiplayer ownership;
 - политика LOD четырёх уровней (Active / Nearby / Regional / Global);
 - runtime self-test на выделенном сервере;
-- 59 unit-тестов, включая per-player catch-up, изоляцию ошибок и режимы исполнения.
+- 61 unit-тест, включая per-player catch-up, изоляцию ошибок и режимы исполнения.
 
 ## Чего ещё нет
 
@@ -138,7 +138,7 @@ node tools/run_tests.mjs
 Ожидаемо:
 
 ```text
-TEST_SUMMARY total=59 passed=59 failed=0 assertions=232
+TEST_SUMMARY total=61 passed=61 failed=0 assertions=231
 ```
 
 Runtime-тест:
