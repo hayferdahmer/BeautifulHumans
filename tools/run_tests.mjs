@@ -82,6 +82,7 @@ const sources = [
   "tests/unit/spec_medical.lua",
   "tests/unit/spec_physiology.lua",
   "tests/unit/spec_simulation.lua",
+  "tests/unit/spec_player_observer.lua",
 ];
 
 for (const relative of sources) {
