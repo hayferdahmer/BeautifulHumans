@@ -1,6 +1,6 @@
 -- Beautiful Humans / simulation foundation facade.
--- This module exposes pure services; game event scheduling is deliberately
--- not wired until the exact Build 42 server tick contract is verified.
+-- This module exposes pure simulation services. ServerRuntime owns the
+-- dedicated/host server event lifecycle; Integration owns single-player updates.
 
 BH = BH or {}
 BH.Simulation = BH.Simulation or {}
