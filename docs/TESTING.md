@@ -12,7 +12,7 @@
 | Unit | `tests/unit` | чистые правила, схема, события, модель |
 | Integration | `tests/integration` | загрузка мода, модули, character extension, лечение |
 | Save/load | ручной сценарий | реальное сохранение персонажа |
-| Multiplayer | будущее | серверная авторизация и синхронизация |
+| Multiplayer | ручная приёмка | server/client ownership, синхронизация и reconnect |
 | Performance | будущее | сцены S1–S6 |
 
 ---
@@ -34,7 +34,7 @@ pnpm --dir tools install
 ### 2.2. Результат v0.1
 
 ```text
-TEST_SUMMARY total=39 passed=39 failed=0 assertions=128
+TEST_SUMMARY total=61 passed=61 failed=0 assertions=231
 ```
 
 ### 2.3. Покрытие
@@ -116,18 +116,20 @@ MaxPlayers=1
 [BH][INFO][core] Resolving modules
 [BH][INFO][core] Modules initialised | ready=7, failed=0, skipped=0
 [BH][INFO][testmod] Test module initialised
-BH_TEST_RESULT PASS total=11 failures=0 version=0.1.0
+BH_TEST_RESULT PASS total=14 failures=0 version=0.1.0
 ```
 
 ### 3.4. Фактический результат
 
-На целевой сборке 42.21.0 получено именно это. Ошибок `Beautiful Humans`
-в логе нет. Ошибки `AdvancedAnimator` о missing `AnimSets`/`actiongroups`
-относятся к пустым каталогам ассетов и не являются ошибками Lua.
+На Build 42.21.0 ранее был подтверждён базовый runtime self-test из 11 проверок на dedicated server. Проверки режима исполнения и владельца симуляции добавлены позднее. Их фактический результат после этих изменений ещё предстоит получить в игре; не считать ожидаемую строку выше подтверждённым результатом новой версии.
 
 ---
 
-## 4. Обязательный ручной сценарий Stage 2
+## 4. Runtime acceptance: режимы исполнения
+
+Полные пошаговые сценарии для single-player, dedicated server и host/listen-server с двумя клиентами находятся в [RUNTIME_ACCEPTANCE.md](RUNTIME_ACCEPTANCE.md). BHTestMod дополнительно печатает `BH_RUNTIME_ACCEPTANCE` и проверяет ожидаемого владельца симуляции. Это smoke test; он не заменяет save/load и multiplayer acceptance.
+
+## 5. Обязательный ручной сценарий Stage 2
 
 ### Сценарий A — травма
 
@@ -153,7 +155,7 @@ BH_TEST_RESULT PASS total=11 failures=0 version=0.1.0
 
 ---
 
-## 5. Проверки сохранений
+## 6. Проверки сохранений
 
 Для каждой сохраняемой системы:
 
@@ -168,7 +170,7 @@ BH_TEST_RESULT PASS total=11 failures=0 version=0.1.0
 
 ---
 
-## 6. Сетевые тесты (не реализованы)
+## 7. Сетевые тесты (не реализованы)
 
 - [ ] клиент не может прислать severity;
 - [ ] повторный requestId не дублирует эффект;
@@ -181,13 +183,13 @@ BH_TEST_RESULT PASS total=11 failures=0 version=0.1.0
 
 ---
 
-## 7. Производительность (не реализована)
+## 8. Производительность (не реализована)
 
 См. `docs/PERFORMANCE.md`, сцены S1–S6.
 
 ---
 
-## 8. Определение готовности задачи
+## 9. Определение готовности задачи
 
 Задача не принимается без:
 
@@ -203,7 +205,7 @@ BH_TEST_RESULT PASS total=11 failures=0 version=0.1.0
 
 ---
 
-## 9. Известные пробелы v0.1
+## 10. Известные пробелы v0.1
 
 - нет теста с живым игроком;
 - нет теста реального save/load;

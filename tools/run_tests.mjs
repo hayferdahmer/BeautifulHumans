@@ -57,6 +57,11 @@ const sources = [
   "src/shared/BH/EventBus.lua",
   "src/shared/BH/ModuleRegistry.lua",
   "src/shared/BH/Core.lua",
+  "src/shared/BH/Simulation/Clock.lua",
+  "src/shared/BH/Simulation/Scheduler.lua",
+  "src/shared/BH/Simulation/LOD.lua",
+  "src/shared/BH/Simulation/Simulation.lua",
+  "src/shared/BH/Simulation/ServerRuntime.lua",
   "src/shared/BH/Persistence/Schema.lua",
   "src/shared/BH/Persistence/Persistence.lua",
   "src/shared/BH/Anatomy/Zones.lua",
@@ -76,6 +81,8 @@ const sources = [
   "tests/unit/spec_anatomy.lua",
   "tests/unit/spec_medical.lua",
   "tests/unit/spec_physiology.lua",
+  "tests/unit/spec_simulation.lua",
+  "tests/unit/spec_player_observer.lua",
 ];
 
 for (const relative of sources) {

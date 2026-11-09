@@ -48,8 +48,72 @@ local function fakePlayer()
     return player
 end
 
+local function readModeFunction(name)
+    local fn = _G[name]
+    if type(fn) ~= "function" then
+        return nil, "unavailable"
+    end
+    local ok, value = pcall(fn)
+    if not ok then
+        return nil, tostring(value)
+    end
+    return value == true
+end
+
+function Test.CheckRuntimeMode()
+    local server, serverError = readModeFunction("isServer")
+    local client, clientError = readModeFunction("isClient")
+    local multiplayer, multiplayerError = readModeFunction("isMultiplayer")
+    local runtime = BH.Simulation and BH.Simulation.ServerRuntime
+    local runtimeStarted = runtime and type(runtime.IsStarted) == "function"
+        and runtime.IsStarted() == true or false
+
+    local mode = "unknown"
+    if multiplayer == false then
+        mode = "single-player"
+    elseif multiplayer == true and server == true then
+        mode = "multiplayer-server"
+    elseif multiplayer == true and client == true then
+        mode = "multiplayer-client"
+    end
+
+    print(string.format(
+        "BH_RUNTIME_ACCEPTANCE mode=%s isServer=%s isClient=%s isMultiplayer=%s runtimeStarted=%s",
+        mode,
+        tostring(server),
+        tostring(client),
+        tostring(multiplayer),
+        tostring(runtimeStarted)
+    ))
+
+    check("runtime mode API", server ~= nil and client ~= nil and multiplayer ~= nil,
+        tostring(serverError) .. " | " .. tostring(clientError) .. " | " .. tostring(multiplayerError))
+    check("runtime service loaded", runtime ~= nil and type(runtime.IsStarted) == "function")
+
+    if multiplayer == true then
+        if server == true then
+            check("multiplayer server owns runtime", runtimeStarted,
+                "server process must start the canonical simulation runtime")
+        elseif client == true then
+            check("multiplayer client is not simulation owner", not runtimeStarted,
+                "client must not start the canonical server runtime")
+        else
+            check("multiplayer execution role is identifiable", false,
+                "neither server nor client API returned true")
+        end
+    elseif multiplayer == false then
+        local observer = BH.Integration and BH.Integration.Player
+        check("single-player local path available",
+            observer ~= nil and type(observer.OnUpdate) == "function")
+        check("single-player does not start server runtime", not runtimeStarted)
+    end
+
+    return mode
+end
+
 function Test.Run()
     check("core version", type(BH.VERSION) == "string" and #BH.VERSION > 0, BH.VERSION)
+    Test.CheckRuntimeMode()
     check("core module", BH.Modules.GetStatus("bh.core") == "ready", BH.Modules.GetStatus("bh.core"))
     check("anatomy module", BH.Modules.GetStatus("bh.anatomy") == "ready", BH.Modules.GetStatus("bh.anatomy"))
     check("medical module", BH.Modules.GetStatus("bh.medical") == "ready", BH.Modules.GetStatus("bh.medical"))

@@ -32,6 +32,9 @@ function BH.RegisterModule(definition)
     return BH.Modules.Register(definition)
 end
 
+-- Load pure simulation services after the public module-registration API exists.
+require "BH/Simulation/Simulation"
+
 function BH.GetVersionString()
     return string.format("%s (API %d, schema %d)", BH.VERSION, BH.API_VERSION, BH.SCHEMA_VERSION)
 end

@@ -25,8 +25,18 @@
   remove bandage;
 - идемпотентность лечения по `requestId`;
 - внутренняя шина событий с приоритетами и защитой от re-entrancy;
-- runtime self-test на выделенном сервере;
-- 39 unit-тестов (128 assertions).
+- симуляционный Clock с инъецируемым источником игрового времени;
+- ограниченный Scheduler с приоритетами, elapsed time и изоляцией ошибок;
+- server-authoritative runtime для dedicated и host/listen-server через `OnServerStarted` / `OnTick`;
+- обработка онлайн-игроков сервером через общий Scheduler и `getOnlinePlayers()`;
+- единый путь симуляции травм и физиологии для сервера и одиночного режима;
+- отдельный накопитель игрового времени для каждого онлайн-игрока;
+- bounded catch-up: до 60 игровых минут на игрока за проход, остаток времени не теряется;
+- безопасное разделение single-player и multiplayer ownership;
+- политика LOD четырёх уровней (Active / Nearby / Regional / Global);
+- runtime smoke test с определением режима и проверкой владельца симуляции;
+- отдельный протокол ручной приёмки single-player, dedicated и host + два клиента;
+- 61 unit-тест, включая per-player catch-up, изоляцию ошибок и режимы исполнения.
 
 ## Чего ещё нет
 
@@ -35,11 +45,16 @@
 - серверной авторизации лечения в мультиплеере;
 - зомби-анатомии и поведения;
 - NPC, экономики, жилья, транспорта;
+- управления реальными NPC/животными/регионами через LOD;
 - профилирования FPS;
 - теста реального сохранения/загрузки персонажа.
 
 Подробно: [TECHNICAL_AUDIT.md](docs/TECHNICAL_AUDIT.md),
-[ROADMAP.md](docs/ROADMAP.md).
+[ROADMAP.md](docs/ROADMAP.md), [проектные решения 1–10](docs/decisions/DESIGN_DECISIONS.md),
+[матрица реализуемости](docs/decisions/IMPLEMENTATION_MATRIX.md),
+[структура проекта](docs/architecture/PROJECT_STRUCTURE.md) и
+[модель симуляции LOD](docs/architecture/SIMULATION_MODEL.md),
+[протокол runtime-приёмки](docs/RUNTIME_ACCEPTANCE.md).
 
 ---
 
@@ -51,7 +66,7 @@
 | Сборка | **42.21.0** |
 | Revision | `4a0e9546ec` |
 | Steam buildid | `25485521` |
-| Режимы | одиночная игра, выделенный сервер |
+| Режимы | одиночная игра, dedicated server, host/listen-server |
 | Язык | Lua (Kahlua) |
 
 Другая сборка требует повторного аудита.
@@ -125,7 +140,7 @@ node tools/run_tests.mjs
 Ожидаемо:
 
 ```text
-TEST_SUMMARY total=39 passed=39 failed=0 assertions=128
+TEST_SUMMARY total=61 passed=61 failed=0 assertions=231
 ```
 
 Runtime-тест:
@@ -144,7 +159,9 @@ node tools/build.mjs
 
 ```text
 BeautifulHumans/
-├── docs/                     документация
+├── docs/
+│   ├── decisions/            проектные решения и матрица реализуемости
+│   └── architecture/         структура проекта и модель симуляции
 ├── src/
 │   ├── shared/BH/            Core, Persistence, Anatomy, Physiology, Medical
 │   │   ├── Core.lua
@@ -181,6 +198,10 @@ BeautifulHumans/
 | [TESTING.md](docs/TESTING.md) | тесты и ручные сценарии |
 | [PUBLISHING.md](docs/PUBLISHING.md) | создание репозитория GitHub, первый push, релизы |
 | [ROADMAP.md](docs/ROADMAP.md) | этапы 0–10 |
+| [DESIGN_DECISIONS.md](docs/decisions/DESIGN_DECISIONS.md) | зафиксированные решения раундов 1–10 |
+| [IMPLEMENTATION_MATRIX.md](docs/decisions/IMPLEMENTATION_MATRIX.md) | реализуемость, ограничения и риски |
+| [PROJECT_STRUCTURE.md](docs/architecture/PROJECT_STRUCTURE.md) | целевая структура каталогов и ответственность слоёв |
+| [SIMULATION_MODEL.md](docs/architecture/SIMULATION_MODEL.md) | LOD, расписание, игровое время и фоновые процессы |
 
 ---
 

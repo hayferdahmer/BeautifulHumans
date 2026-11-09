@@ -20,6 +20,7 @@ local Player = {
     baselines = {},
     tickCounters = {},
     lastTickAt = {},
+    pendingSimulationMinutes = {},
     pendingContext = {},
 }
 BH.Integration.Player = Player
@@ -64,9 +65,9 @@ end
 
 function Player.ReadPartState(part)
     return {
-        bitten = callBool(part, "isBitten"),
+        bitten = callBool(part, "bitten"),
         cut = callBool(part, "isCut"),
-        scratched = callBool(part, "isScratched"),
+        scratched = callBool(part, "scratched"),
         deepWounded = callBool(part, "isDeepWounded"),
         fracture = callNumber(part, "getFractureTime", 0) > 0,
         burn = callNumber(part, "getBurnTime", 0) > 0,
@@ -261,10 +262,70 @@ function Player.OnCreate(playerIndex, player)
     end
 end
 
+function Player.ProcessSimulation(player, minutes, context)
+    if not player then
+        return false, "player is nil"
+    end
+    if not BH.Util.IsFiniteNumber(minutes) or minutes <= 0 then
+        return false, "elapsed simulation minutes must be positive and finite"
+    end
+
+    local ext, errorMessage = Player.EnsurePlayer(player)
+    if not ext then
+        return false, errorMessage
+    end
+
+    local key = Player.Key(player)
+    context = type(context) == "table" and context or Player.pendingContext[key] or {}
+    Player.pendingContext[key] = nil
+    Player.ScanBaseInjuries(player, ext, context)
+
+    local healed = Model.Tick(ext, minutes)
+    if BH.Physiology and BH.Physiology.Tick then
+        BH.Physiology.Tick(ext, minutes)
+    end
+    if healed > 0 then
+        BH.Log.Info("player", "Injuries healed", { count = healed })
+    end
+    return true, { healed = healed, minutes = minutes }
+end
+
+-- Dedicated server entry point. The server runtime invokes this from the
+-- shared scheduler; it never relies on the local-player OnPlayerUpdate event.
+function Player.OnServerSimulationTick(player, minutes)
+    return Player.ProcessSimulation(player, minutes)
+end
+
 function Player.OnUpdate(player)
     if not player then
         return
     end
+
+    -- В мультиплеере каноническую симуляцию выполняет сервер, включая host.
+    -- Не выводим режим SP из isServer/isClient: проверяем сам режим игры.
+    if type(isMultiplayer) == "function" then
+        local modeOk, multiplayer = pcall(isMultiplayer)
+        if not modeOk or multiplayer == true then
+            return
+        end
+    else
+        -- При отсутствии API режима безопаснее не запускать локальную
+        -- симуляцию в процессах, которые явно обозначены как server/client.
+        local serverProcess = false
+        local clientProcess = false
+        if type(isServer) == "function" then
+            local ok, value = pcall(isServer)
+            serverProcess = ok and value == true
+        end
+        if type(isClient) == "function" then
+            local ok, value = pcall(isClient)
+            clientProcess = ok and value == true
+        end
+        if serverProcess or clientProcess then
+            return
+        end
+    end
+
     local key = Player.Key(player)
     local interval = BH.Config.Get("tickInterval") or 30
     local counter = (Player.tickCounters[key] or 0) + 1
@@ -274,30 +335,29 @@ function Player.OnUpdate(player)
     end
     Player.tickCounters[key] = 0
 
-    local ext = Player.EnsurePlayer(player)
-    if not ext then
-        return
-    end
-
-    local context = Player.pendingContext[key] or {}
-    Player.pendingContext[key] = nil
-    Player.ScanBaseInjuries(player, ext, context)
-
     local now = BH.Persistence.GetGameTimeHours()
     local last = Player.lastTickAt[key]
-    local minutes = 0.5
+    local elapsedMinutes = 0.5
     if last and now > last then
-        minutes = BH.Util.Clamp((now - last) * 60, 0.1, 60)
+        elapsedMinutes = (now - last) * 60
     end
     Player.lastTickAt[key] = now
 
-    local healed = Model.Tick(ext, minutes)
-    if BH.Physiology and BH.Physiology.Tick then
-        BH.Physiology.Tick(ext, minutes)
-    end
-
-    if healed > 0 then
-        BH.Log.Info("player", "Injuries healed", { count = healed })
+    local debt = (Player.pendingSimulationMinutes[key] or 0) + elapsedMinutes
+    local step = math.min(debt, 60)
+    local processed, result = Player.ProcessSimulation(player, step)
+    if processed then
+        debt = math.max(0, debt - step)
+        Player.pendingSimulationMinutes[key] = debt > 0.000001 and debt or nil
+    else
+        Player.pendingSimulationMinutes[key] = debt
+        if BH.Log then
+            BH.Log.Warn("player", "Single-player simulation deferred; elapsed time retained", {
+                player = key,
+                pendingMinutes = debt,
+                error = tostring(result),
+            })
+        end
     end
 end
 
@@ -330,6 +390,7 @@ function Player.OnDeath(player)
     Player.baselines[key] = nil
     Player.tickCounters[key] = nil
     Player.lastTickAt[key] = nil
+    Player.pendingSimulationMinutes[key] = nil
     Player.pendingContext[key] = nil
 end
 
