@@ -20,6 +20,7 @@ local Player = {
     baselines = {},
     tickCounters = {},
     lastTickAt = {},
+    pendingSimulationMinutes = {},
     pendingContext = {},
 }
 BH.Integration.Player = Player
@@ -269,9 +270,6 @@ function Player.ProcessSimulation(player, minutes, context)
         return false, "elapsed simulation minutes must be positive and finite"
     end
 
-    -- Injury progression already caps its own integration step. Keep the
-    -- physiology model bounded as well after long server pauses.
-    minutes = math.min(minutes, 1440)
     local ext, errorMessage = Player.EnsurePlayer(player)
     if not ext then
         return false, errorMessage
@@ -303,21 +301,21 @@ function Player.OnUpdate(player)
         return
     end
 
-    -- Multiplayer clients never own canonical physiology. Dedicated and
-    -- hosted servers use ServerRuntime; only true single-player uses this
-    -- local update path.
-    local serverProcess = false
-    local clientProcess = false
-    if type(isServer) == "function" then
-        local ok, value = pcall(isServer)
-        serverProcess = ok and value == true
-    end
-    if type(isClient) == "function" then
-        local ok, value = pcall(isClient)
-        clientProcess = ok and value == true
-    end
-    if serverProcess or clientProcess then
-        return
+    -- В мультиплеере каноническую симуляцию выполняет сервер, включая host.
+    -- Не выводим режим SP из isServer/isClient: проверяем сам режим игры.
+    if type(isMultiplayer) == "function" then
+        local modeOk, multiplayer = pcall(isMultiplayer)
+        if not modeOk or multiplayer == true then
+            return
+        end
+    else
+        -- При отсутствии API режима безопаснее не запускать локальную
+        -- симуляцию в процессах, которые явно обозначены как server/client.
+        local serverProcess = type(isServer) == "function" and isServer() == true
+        local clientProcess = type(isClient) == "function" and isClient() == true
+        if serverProcess or clientProcess then
+            return
+        end
     end
 
     local key = Player.Key(player)
@@ -331,12 +329,28 @@ function Player.OnUpdate(player)
 
     local now = BH.Persistence.GetGameTimeHours()
     local last = Player.lastTickAt[key]
-    local minutes = 0.5
+    local elapsedMinutes = 0.5
     if last and now > last then
-        minutes = BH.Util.Clamp((now - last) * 60, 0.1, 60)
+        elapsedMinutes = (now - last) * 60
     end
     Player.lastTickAt[key] = now
-    Player.ProcessSimulation(player, minutes)
+
+    local debt = (Player.pendingSimulationMinutes[key] or 0) + elapsedMinutes
+    local step = math.min(debt, 60)
+    local processed, result = Player.ProcessSimulation(player, step)
+    if processed then
+        debt = math.max(0, debt - step)
+        Player.pendingSimulationMinutes[key] = debt > 0.000001 and debt or nil
+    else
+        Player.pendingSimulationMinutes[key] = debt
+        if BH.Log then
+            BH.Log.Warn("player", "Single-player simulation deferred; elapsed time retained", {
+                player = key,
+                pendingMinutes = debt,
+                error = tostring(result),
+            })
+        end
+    end
 end
 
 function Player.OnGetDamage(character, damageType, damage)
@@ -368,6 +382,7 @@ function Player.OnDeath(player)
     Player.baselines[key] = nil
     Player.tickCounters[key] = nil
     Player.lastTickAt[key] = nil
+    Player.pendingSimulationMinutes[key] = nil
     Player.pendingContext[key] = nil
 end
 
