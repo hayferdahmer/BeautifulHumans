@@ -11,7 +11,7 @@ validates that:
 - duplicate request protection works;
 - the internal event bus delivers events.
 
-The test is intentionally independent of the main mod's load order.
+The test is intentionally independent of the main mod's load order. It also prints a `BH_RUNTIME_ACCEPTANCE` line and checks the expected simulation owner for single-player, multiplayer server, or multiplayer client execution.
 
 ### Install
 
@@ -32,7 +32,7 @@ In `%USERPROFILE%\Zomboid\console.txt`:
 BH_TEST_RESULT PASS total=11 failures=0 version=0.1.0
 ```
 
-A failing check prints `[BHTest] FAIL ...` immediately before the summary.
+A failing check prints `[BHTest] FAIL ...` immediately before the summary. The runtime mode check is a smoke test, not proof of save/load correctness or multiplayer treatment security. Follow [the full runtime acceptance protocol](../../docs/RUNTIME_ACCEPTANCE.md) for the manual matrix.
 
 ### Manual scenario
 
