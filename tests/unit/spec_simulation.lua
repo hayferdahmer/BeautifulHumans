@@ -110,7 +110,11 @@ describe("Simulation scheduler", function()
     it("isolates callback failures and does not retry in a tight loop", function()
         local scheduler = BH.Simulation.Scheduler.New()
         local good = 0
-        scheduler:Register({ id = "test.bad", interval = 1, onTick = function() error("broken") end })
+        local failedElapsed = {}
+        scheduler:Register({ id = "test.bad", interval = 1, onTick = function(elapsed)
+            failedElapsed[#failedElapsed + 1] = elapsed
+            error("broken")
+        end })
         scheduler:Register({ id = "test.good", interval = 1, onTick = function() good = good + 1 end })
         scheduler:Tick(0)
         local ok, stats = scheduler:Tick(1)
@@ -122,6 +126,9 @@ describe("Simulation scheduler", function()
         truthy(status.lastError)
         scheduler:Tick(1)
         eq(good, 1)
+        scheduler:Tick(2)
+        eq(failedElapsed[1], 1)
+        eq(failedElapsed[2], 2)
     end)
 
     it("rejects duplicates, invalid definitions and re-entrant ticks", function()
