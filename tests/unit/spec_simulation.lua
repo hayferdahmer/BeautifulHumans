@@ -142,6 +142,19 @@ describe("Simulation scheduler", function()
         scheduler:Tick(1)
     end)
 
+    it("releases the running guard after an unexpected scheduler-internal error", function()
+        local scheduler = BH.Simulation.Scheduler.New()
+        scheduler.processes = setmetatable({}, {
+            __pairs = function() error("internal iteration failure") end,
+        })
+        local ok = scheduler:Tick(1)
+        falsy(ok)
+        falsy(scheduler.running)
+        scheduler.processes = {}
+        local recovered = scheduler:Tick(2)
+        truthy(recovered)
+    end)
+
     it("supports disable, enable and unregister", function()
         local scheduler = BH.Simulation.Scheduler.New()
         local calls = 0
@@ -209,6 +222,20 @@ describe("Dedicated server simulation runtime", function()
         eq(seen[1].player, "first")
         eq(seen[2].minutes, 30)
         eq(seen[3].player, "third")
+    end)
+
+    it("does not execute canonical player simulation from multiplayer client updates", function()
+        local Player = BH.Integration.Player
+        local oldIsServer, oldIsClient = isServer, isClient
+        local oldProcess = Player.ProcessSimulation
+        local calls = 0
+        Player.ProcessSimulation = function() calls = calls + 1 end
+        isServer = function() return false end
+        isClient = function() return true end
+        Player.OnUpdate({ getOnlineID = function() return 999 end })
+        eq(calls, 0)
+        Player.ProcessSimulation = oldProcess
+        isServer, isClient = oldIsServer, oldIsClient
     end)
 
     it("isolates one player's processing failure", function()
