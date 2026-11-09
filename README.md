@@ -34,7 +34,8 @@
 - bounded catch-up: до 60 игровых минут на игрока за проход, остаток времени не теряется;
 - безопасное разделение single-player и multiplayer ownership;
 - политика LOD четырёх уровней (Active / Nearby / Regional / Global);
-- runtime smoke test с определением режима и проверкой владельца симуляции;\n- отдельный протокол ручной приёмки single-player, dedicated и host + два клиента;
+- runtime smoke test с определением режима и проверкой владельца симуляции;
+- отдельный протокол ручной приёмки single-player, dedicated и host + два клиента;
 - 61 unit-тест, включая per-player catch-up, изоляцию ошибок и режимы исполнения.
 
 ## Чего ещё нет
@@ -52,7 +53,8 @@
 [ROADMAP.md](docs/ROADMAP.md), [проектные решения 1–10](docs/decisions/DESIGN_DECISIONS.md),
 [матрица реализуемости](docs/decisions/IMPLEMENTATION_MATRIX.md),
 [структура проекта](docs/architecture/PROJECT_STRUCTURE.md) и
-[модель симуляции LOD](docs/architecture/SIMULATION_MODEL.md),\n[протокол runtime-приёмки](docs/RUNTIME_ACCEPTANCE.md).
+[модель симуляции LOD](docs/architecture/SIMULATION_MODEL.md),
+[протокол runtime-приёмки](docs/RUNTIME_ACCEPTANCE.md).
 
 ---
 
