@@ -29,7 +29,7 @@ Enable both mods in the in-game mod list. `BHTestMod` declares
 In `%USERPROFILE%\Zomboid\console.txt`:
 
 ```text
-BH_TEST_RESULT PASS total=11 failures=0 version=0.1.0
+BH_TEST_RESULT PASS total=14 failures=0 version=0.1.0 (multiplayer server/client); single-player reports total=15.
 ```
 
 A failing check prints `[BHTest] FAIL ...` immediately before the summary. The runtime mode check is a smoke test, not proof of save/load correctness or multiplayer treatment security. Follow [the full runtime acceptance protocol](../../docs/RUNTIME_ACCEPTANCE.md) for the manual matrix.
