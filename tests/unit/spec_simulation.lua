@@ -233,16 +233,50 @@ describe("Dedicated server simulation runtime", function()
 
     it("does not execute canonical player simulation from multiplayer client updates", function()
         local Player = BH.Integration.Player
-        local oldIsServer, oldIsClient = isServer, isClient
+        local oldIsServer, oldIsClient, oldIsMultiplayer = isServer, isClient, isMultiplayer
         local oldProcess = Player.ProcessSimulation
         local calls = 0
         Player.ProcessSimulation = function() calls = calls + 1 end
         isServer = function() return false end
         isClient = function() return true end
+        isMultiplayer = function() return true end
         Player.OnUpdate({ getOnlineID = function() return 999 end })
         eq(calls, 0)
         Player.ProcessSimulation = oldProcess
-        isServer, isClient = oldIsServer, oldIsClient
+        isServer, isClient, isMultiplayer = oldIsServer, oldIsClient, oldIsMultiplayer
+    end)
+
+
+    it("uses the local update path when the game explicitly reports single-player", function()
+        local Player = BH.Integration.Player
+        local oldIsServer, oldIsClient, oldIsMultiplayer = isServer, isClient, isMultiplayer
+        local oldProcess = Player.ProcessSimulation
+        local oldGetTime = BH.Persistence.GetGameTimeHours
+        local player = { getOnlineID = function() return 1001 end }
+        local key = Player.Key(player)
+        local calls = 0
+
+        isServer = function() return false end
+        isClient = function() return false end
+        isMultiplayer = function() return false end
+        BH.Persistence.GetGameTimeHours = function() return 50 end
+        Player.tickCounters[key] = (BH.Config.Get("tickInterval") or 30) - 1
+        Player.lastTickAt[key] = nil
+        Player.ProcessSimulation = function(_, minutes)
+            calls = calls + 1
+            eq(minutes, 0.5)
+            return true
+        end
+
+        Player.OnUpdate(player)
+        eq(calls, 1)
+
+        Player.ProcessSimulation = oldProcess
+        BH.Persistence.GetGameTimeHours = oldGetTime
+        isServer, isClient, isMultiplayer = oldIsServer, oldIsClient, oldIsMultiplayer
+        Player.tickCounters[key] = nil
+        Player.lastTickAt[key] = nil
+        Player.pendingSimulationMinutes[key] = nil
     end)
 
     it("isolates one player's processing failure", function()
