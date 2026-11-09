@@ -361,7 +361,6 @@ function Model.Tick(ext, minutes)
     if type(ext) ~= "table" or not BH.Util.IsFiniteNumber(minutes) or minutes <= 0 then
         return 0
     end
-    minutes = math.min(minutes, 1440)
 
     local anatomy = ensureAnatomy(ext)
     local now = nowHours()
