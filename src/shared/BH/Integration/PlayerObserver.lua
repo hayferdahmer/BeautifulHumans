@@ -65,9 +65,9 @@ end
 
 function Player.ReadPartState(part)
     return {
-        bitten = callBool(part, "isBitten"),
+        bitten = callBool(part, "bitten"),
         cut = callBool(part, "isCut"),
-        scratched = callBool(part, "isScratched"),
+        scratched = callBool(part, "scratched"),
         deepWounded = callBool(part, "isDeepWounded"),
         fracture = callNumber(part, "getFractureTime", 0) > 0,
         burn = callNumber(part, "getBurnTime", 0) > 0,
