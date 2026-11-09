@@ -163,43 +163,51 @@ function Scheduler:Tick(now, executionBudget)
     budget = math.floor(budget)
 
     self.running = true
-    local ordered = sortedProcesses(self.processes)
     local stats = { executed = 0, failed = 0, deferred = 0, now = now }
-
-    for index = 1, #ordered do
-        local process = ordered[index]
-        if self.processes[process.id] == process and process.enabled then
-            if process.nextRun == nil then
-                process.lastRun = now
-                process.nextRun = now + process.interval
-            elseif now >= process.nextRun then
-                if stats.executed >= budget then
-                    stats.deferred = stats.deferred + 1
-                else
-                    local elapsed = math.max(0, now - (process.lastRun or now))
+    local ok, fatalError = xpcall(function()
+        local ordered = sortedProcesses(self.processes)
+        for index = 1, #ordered do
+            local process = ordered[index]
+            if self.processes[process.id] == process and process.enabled then
+                if process.nextRun == nil then
                     process.lastRun = now
                     process.nextRun = now + process.interval
-                    local ok, errorMessage = pcall(process.onTick, elapsed, now, {
-                        id = process.id,
-                        interval = process.interval,
-                        priority = process.priority,
-                    })
-                    stats.executed = stats.executed + 1
-                    process.executions = process.executions + 1
-                    if not ok then
-                        stats.failed = stats.failed + 1
-                        process.failures = process.failures + 1
-                        process.lastError = tostring(errorMessage)
+                elseif now >= process.nextRun then
+                    if stats.executed >= budget then
+                        stats.deferred = stats.deferred + 1
                     else
-                        process.lastError = nil
+                        local elapsed = math.max(0, now - (process.lastRun or now))
+                        process.lastRun = now
+                        process.nextRun = now + process.interval
+                        local callbackOk, errorMessage = pcall(process.onTick, elapsed, now, {
+                            id = process.id,
+                            interval = process.interval,
+                            priority = process.priority,
+                        })
+                        stats.executed = stats.executed + 1
+                        process.executions = process.executions + 1
+                        if not callbackOk then
+                            stats.failed = stats.failed + 1
+                            process.failures = process.failures + 1
+                            process.lastError = tostring(errorMessage)
+                        else
+                            process.lastError = nil
+                        end
                     end
                 end
             end
         end
+        self.lastNow = now
+    end, function(err)
+        return tostring(err)
+    end)
+
+    -- Always release the re-entrancy guard, even if scheduler internals fail.
+    self.running = false
+    if not ok then
+        return false, fatalError
     end
 
-    self.lastNow = now
-    self.running = false
     self.totals.executed = self.totals.executed + stats.executed
     self.totals.failed = self.totals.failed + stats.failed
     self.totals.deferred = self.totals.deferred + stats.deferred
