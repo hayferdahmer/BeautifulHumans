@@ -185,8 +185,9 @@ function Scheduler:Tick(now, executionBudget)
                         stats.executed = stats.executed + 1
                         process.executions = process.executions + 1
                         if not callbackOk then
-                            -- Keep the elapsed-time debt: a later attempt receives
-                            -- the full interval since the last successful execution.
+                            -- Keep elapsed-time debt, but apply normal backoff:
+                            -- retry only at the next interval, not on every tick.
+                            process.nextRun = now + process.interval
                             stats.failed = stats.failed + 1
                             process.failures = process.failures + 1
                             process.lastError = tostring(errorMessage)
