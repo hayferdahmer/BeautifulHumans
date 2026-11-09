@@ -45,6 +45,13 @@ local function listSize(players)
 end
 
 local function playerKey(player, index)
+    local persistence = BH.Persistence
+    if persistence and type(persistence.GetPlayerKey) == "function" then
+        local ok, key = pcall(persistence.GetPlayerKey, player)
+        if ok and type(key) == "string" and key ~= "" and key ~= "unknown" then
+            return "character:" .. key
+        end
+    end
     local observer = BH.Integration and BH.Integration.Player
     if observer and type(observer.Key) == "function" then
         local ok, key = pcall(observer.Key, player)
