@@ -302,6 +302,24 @@ function Player.OnUpdate(player)
     if not player then
         return
     end
+
+    -- Multiplayer clients never own canonical physiology. Dedicated and
+    -- hosted servers use ServerRuntime; only true single-player uses this
+    -- local update path.
+    local serverProcess = false
+    local clientProcess = false
+    if type(isServer) == "function" then
+        local ok, value = pcall(isServer)
+        serverProcess = ok and value == true
+    end
+    if type(isClient) == "function" then
+        local ok, value = pcall(isClient)
+        clientProcess = ok and value == true
+    end
+    if serverProcess or clientProcess then
+        return
+    end
+
     local key = Player.Key(player)
     local interval = BH.Config.Get("tickInterval") or 30
     local counter = (Player.tickCounters[key] or 0) + 1
