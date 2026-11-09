@@ -263,6 +263,61 @@ describe("Dedicated server simulation runtime", function()
         eq(stats.failed, 1)
     end)
 
+
+    it("bounds catch-up per player and carries remaining time forward", function()
+        local players = {
+            values = { "catchup-alpha" },
+            size = function(self) return #self.values end,
+            get = function(self, index)
+                local name = self.values[index + 1]
+                return { getOnlineID = function() return name end }
+            end,
+        }
+        local steps = {}
+        local ok, first = BH.Simulation.ServerRuntime.ProcessOnlinePlayers(
+            players, 2, function(_, minutes) steps[#steps + 1] = minutes end, 30
+        )
+        truthy(ok)
+        eq(first.processedMinutes, 30)
+        eq(first.pendingMinutes, 90)
+        eq(steps[1], 30)
+
+        local okAgain, second = BH.Simulation.ServerRuntime.ProcessOnlinePlayers(
+            players, 0.25, function(_, minutes) steps[#steps + 1] = minutes end, 30
+        )
+        truthy(okAgain)
+        eq(second.processedMinutes, 30)
+        eq(second.pendingMinutes, 75)
+        eq(steps[2], 30)
+        eq(BH.Simulation.ServerRuntime.GetPlayerDebt("id:catchup-alpha"), 75)
+    end)
+
+    it("retains only the failed player's debt and does not replay successful players", function()
+        local players = {
+            values = { "catchup-broken", "catchup-healthy" },
+            size = function(self) return #self.values end,
+            get = function(self, index)
+                local name = self.values[index + 1]
+                return { getOnlineID = function() return name end }
+            end,
+        }
+        local healthyCalls = 0
+        local ok, stats = BH.Simulation.ServerRuntime.ProcessOnlinePlayers(
+            players, 0.5, function(player)
+                if player:getOnlineID() == "catchup-broken" then
+                    error("temporary failure")
+                end
+                healthyCalls = healthyCalls + 1
+            end, 60
+        )
+        truthy(ok)
+        eq(stats.failed, 1)
+        eq(stats.processed, 1)
+        eq(healthyCalls, 1)
+        eq(BH.Simulation.ServerRuntime.GetPlayerDebt("id:catchup-broken"), 30)
+        eq(BH.Simulation.ServerRuntime.GetPlayerDebt("id:catchup-healthy"), 0)
+    end)
+
     it("rejects invalid elapsed time and invalid player collections", function()
         local ok = BH.Simulation.ServerRuntime.ProcessOnlinePlayers({}, 0)
         falsy(ok)
