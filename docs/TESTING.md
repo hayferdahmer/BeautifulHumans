@@ -34,7 +34,7 @@ pnpm --dir tools install
 ### 2.2. Результат v0.1
 
 ```text
-TEST_SUMMARY total=39 passed=39 failed=0 assertions=128
+TEST_SUMMARY total=61 passed=61 failed=0 assertions=231
 ```
 
 ### 2.3. Покрытие
@@ -116,7 +116,7 @@ MaxPlayers=1
 [BH][INFO][core] Resolving modules
 [BH][INFO][core] Modules initialised | ready=7, failed=0, skipped=0
 [BH][INFO][testmod] Test module initialised
-BH_TEST_RESULT PASS total=11 failures=0 version=0.1.0
+BH_TEST_RESULT PASS total=14 failures=0 version=0.1.0
 ```
 
 ### 3.4. Фактический результат
