@@ -311,8 +311,16 @@ function Player.OnUpdate(player)
     else
         -- При отсутствии API режима безопаснее не запускать локальную
         -- симуляцию в процессах, которые явно обозначены как server/client.
-        local serverProcess = type(isServer) == "function" and isServer() == true
-        local clientProcess = type(isClient) == "function" and isClient() == true
+        local serverProcess = false
+        local clientProcess = false
+        if type(isServer) == "function" then
+            local ok, value = pcall(isServer)
+            serverProcess = ok and value == true
+        end
+        if type(isClient) == "function" then
+            local ok, value = pcall(isClient)
+            clientProcess = ok and value == true
+        end
         if serverProcess or clientProcess then
             return
         end
