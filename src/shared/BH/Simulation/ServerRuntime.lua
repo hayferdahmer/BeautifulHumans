@@ -48,7 +48,7 @@ local function playerKey(player, index)
     local persistence = BH.Persistence
     if persistence and type(persistence.GetPlayerKey) == "function" then
         local ok, key = pcall(persistence.GetPlayerKey, player)
-        if ok and type(key) == "string" and key ~= "" and key ~= "unknown" then
+        if ok and type(key) == "string" and key ~= "" and key ~= "unknown" and key ~= "local" then
             return "character:" .. key
         end
     end
