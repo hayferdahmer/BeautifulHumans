@@ -177,8 +177,6 @@ function Scheduler:Tick(now, executionBudget)
                         stats.deferred = stats.deferred + 1
                     else
                         local elapsed = math.max(0, now - (process.lastRun or now))
-                        process.lastRun = now
-                        process.nextRun = now + process.interval
                         local callbackOk, errorMessage = pcall(process.onTick, elapsed, now, {
                             id = process.id,
                             interval = process.interval,
@@ -187,10 +185,14 @@ function Scheduler:Tick(now, executionBudget)
                         stats.executed = stats.executed + 1
                         process.executions = process.executions + 1
                         if not callbackOk then
+                            -- Keep the elapsed-time debt: a later attempt receives
+                            -- the full interval since the last successful execution.
                             stats.failed = stats.failed + 1
                             process.failures = process.failures + 1
                             process.lastError = tostring(errorMessage)
                         else
+                            process.lastRun = now
+                            process.nextRun = now + process.interval
                             process.lastError = nil
                         end
                     end
