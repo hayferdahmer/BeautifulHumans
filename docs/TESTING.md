@@ -121,13 +121,15 @@ BH_TEST_RESULT PASS total=14 failures=0 version=0.1.0
 
 ### 3.4. Фактический результат
 
-На целевой сборке 42.21.0 получено именно это. Ошибок `Beautiful Humans`
-в логе нет. Ошибки `AdvancedAnimator` о missing `AnimSets`/`actiongroups`
-относятся к пустым каталогам ассетов и не являются ошибками Lua.
+На Build 42.21.0 ранее был подтверждён базовый runtime self-test из 11 проверок на dedicated server. Проверки режима исполнения и владельца симуляции добавлены позднее. Их фактический результат после этих изменений ещё предстоит получить в игре; не считать ожидаемую строку выше подтверждённым результатом новой версии.
 
 ---
 
-## 4. Runtime acceptance: режимы исполнения\n\nПолные пошаговые сценарии для single-player, dedicated server и host/listen-server с двумя клиентами находятся в [RUNTIME_ACCEPTANCE.md](RUNTIME_ACCEPTANCE.md). BHTestMod дополнительно печатает `BH_RUNTIME_ACCEPTANCE` и проверяет ожидаемого владельца симуляции. Это smoke test; он не заменяет save/load и multiplayer acceptance.\n\n## 5. Обязательный ручной сценарий Stage 2
+## 4. Runtime acceptance: режимы исполнения
+
+Полные пошаговые сценарии для single-player, dedicated server и host/listen-server с двумя клиентами находятся в [RUNTIME_ACCEPTANCE.md](RUNTIME_ACCEPTANCE.md). BHTestMod дополнительно печатает `BH_RUNTIME_ACCEPTANCE` и проверяет ожидаемого владельца симуляции. Это smoke test; он не заменяет save/load и multiplayer acceptance.
+
+## 5. Обязательный ручной сценарий Stage 2
 
 ### Сценарий A — травма
 
